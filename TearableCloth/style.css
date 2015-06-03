@@ -25,6 +25,17 @@ body {
     border-bottom-right-radius: 10px;
     border:1px solid #333;
 }
+#controls {
+    position: absolute;
+    left: 1px;
+    top: 300px;
+    width: auto;
+    max-width: 380px;
+    height: auto;
+    background: #f2f2f2;
+    border-bottom-right-radius: 10px;
+    border:1px solid #333;
+}
 #top {
     background: #fff;
     width: 100%;

@@ -21,17 +21,19 @@ THE SOFTWARE.
 */
 
 // settings
+function getValue(elementId){
+    return document.getElementById(elementId).value;
+}
 
-var physics_accuracy = 3,
-    mouse_influence = 20,
-    mouse_cut = 5,
-    gravity = 1200,
-    cloth_height = 30,
-    cloth_width = 50,
-    start_y = 20,
-    spacing = 7,
-    tear_distance = 60;
-
+var physics_accuracy = document.getElementById('pa_text').value,//getValue("physics_accuracy"),
+    mouse_influence = document.getElementById('mi_text').value,//20,//getValue("mouse_influence"),
+    mouse_cut = document.getElementById('mc_text').value,//5,
+    gravity = document.getElementById('g_text').value,//1200,
+    cloth_height = document.getElementById('ch_text').value,// 30,
+    cloth_width = 50,//document.getElementById('cw_text').value,//50,
+    start_y = 20,//document.getElementById('sy_text').value,//20,
+    spacing = 7,//document.getElementById('s_text').value,//7,
+    tear_distance = 60;//document.getElementById('td_text').value;//60;
 
 window.requestAnimFrame =
     window.requestAnimationFrame ||
@@ -57,6 +59,7 @@ var canvas,
         py: 0
     };
 
+// Define a point
 var Point = function (x, y) {
 
     this.x = x;
@@ -71,6 +74,7 @@ var Point = function (x, y) {
     this.constraints = [];
 };
 
+// Add update property to Point
 Point.prototype.update = function (delta) {
 
     if (mouse.down) {
@@ -299,6 +303,7 @@ window.onload = function () {
 
     canvas.width = 560;
     canvas.height = 350;
+
 
     start();
 };
