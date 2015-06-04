@@ -8,7 +8,7 @@
 
 </head>
 
-<body onload="start();">
+<body>
 
     <canvas id="c"></canvas>
 
@@ -63,7 +63,7 @@
 
                 <tr>
                     <td> Cloth Width </td>
-                    <td> <input type = "range" id="cloth_width" min="50" max="500" value="50" step="50"
+                    <td> <input type = "range" id="cloth_width" min="50" max="500" value="50" step="10"
                         onchange="printValue('cloth_width','cw_text')"></td>
                     <td> <input type = "text" id="cw_text" disabled="disabled" size="4" value="50"></td>
                 </tr>
@@ -96,8 +96,22 @@
                     <td> <input type = "text" id="td_text" disabled="disabled" size="4" value="60"></td>
                 </tr>
 
+                <tr>
+                    <td> Canvas width </td>
+                    <td> <input type = "range" id="canvas_width" min="400" max="1200" value="560" step="50"
+                        onchange="printValue('canvas_width','caw_text')"></td>
+                    <td> <input type = "text" id="caw_text" disabled="disabled" size="4" value="560"></td>
+                </tr>
+
+                <tr>
+                    <td> Canvas Height </td>
+                    <td> <input type = "range" id="canvas_height" min="300" max="800" value="350" step="50"
+                        onchange="printValue('canvas_height','cah_text')"></td>
+                    <td> <input type = "text" id="cah_text" disabled="disabled" size="4" value="350"></td>
+                </tr>
+
             </table>
-            <button id="set"> Set </button>
+            <button id="set" onclick="start()"> Set </button>
         </p>
     </div >
 
