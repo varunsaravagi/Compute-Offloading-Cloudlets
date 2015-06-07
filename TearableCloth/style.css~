@@ -28,7 +28,7 @@ body {
 #controls {
     position: absolute;
     left: 1px;
-    top: 250px;
+    top: 300px;
     width: auto;
     max-width: 380px;
     height: auto;

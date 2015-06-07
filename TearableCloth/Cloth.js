@@ -355,6 +355,7 @@ function start() {
         e.preventDefault();
     };
 
+
     boundsx = canvas.width - 1;
     boundsy = canvas.height - 1;
 
@@ -373,6 +374,37 @@ window.onload = function () {
 
     canvas.width = 560;
     canvas.height = 350;
+
+
+    canvas.addEventListener("touchstart", function(event){
+        event.preventDefault();
+        var touch = event.targetTouches[0];
+        mouse.button = event.targetTouches.length;
+        mouse.px = mouse.x;
+        mouse.py = mouse.y;
+        var rect = canvas.getBoundingClientRect();
+        mouse.x = touch.clientX - rect.left,
+        mouse.y = touch.clientY - rect.top,
+        mouse.down = true;  
+    }, false);
+
+    canvas.addEventListener("touchmove", function(event){
+        event.preventDefault();
+        var touch = event.targetTouches[0];
+        mouse.px = mouse.x;
+        mouse.py = mouse.y;
+        var rect = canvas.getBoundingClientRect();
+        mouse.x = touch.clientX - rect.left,
+        mouse.y = touch.clientY - rect.top,
+        event.preventDefault();
+        console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");  
+    }, false);
+
+    canvas.addEventListener("touchend", function(event){
+        event.preventDefault();        
+        mouse.down = false;
+        event.preventDefault();
+    }, false);
 
     start();
 };
