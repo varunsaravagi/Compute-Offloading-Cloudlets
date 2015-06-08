@@ -1,0 +1,14 @@
+{
+  "name": "tearablecloth",
+  "version": "1.0.0",
+  "description": "split of tearable cloth simulation into client-server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "varun saravagi <vsaravag@andrew.cmu.edu>",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^1.3.5"
+  }
+}
