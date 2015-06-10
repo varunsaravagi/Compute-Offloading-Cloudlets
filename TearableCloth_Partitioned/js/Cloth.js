@@ -39,6 +39,7 @@ var physics_accuracy,
     spacing,
     tear_distance;
 
+
 function load_variables(){
     physics_accuracy = parseInt(document.getElementById('pa_text').value),//getValue("physics_accuracy"),
     mouse_influence = parseInt(document.getElementById('mi_text').value),//20,//getValue("mouse_influence"),
@@ -264,7 +265,7 @@ var Cloth = function () {
 
             // if it is not the first point in the row, attach it with the point just before it
             x != 0 && p.attach(this.points[this.points.length - 1]);
-            
+
             // if it is the first row, pin the point at the coordinate. This is to keep the cloth
             // attached from the top.
             y == 0 && p.pin(p.x, p.y);
@@ -313,15 +314,25 @@ Cloth.prototype.draw = function () {
     ctx.stroke();
 };
 
+var t = new timer();
+var startTime;
 
 function update() {
-
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     cloth.update();
     cloth.draw();
-
+    var end = new Date().getTime();
+    //console.log("Update finished: Time taken " + (end-start));
     requestAnimFrame(update);
+    t.tick(new Date().getTime());
+    if(end-startTime > 1000){
+        startTime = new Date().getTime();
+        document.getElementById('fps').innerHTML = "FPS: " + t.fps();
+    }
+
+    
 }
 
 function start() {
@@ -364,6 +375,7 @@ function start() {
     load_variables();    
     // Define the points and constraints in the cloth
     cloth = new Cloth();
+    startTime = new Date().getTime();
     update();
 }
 

@@ -43,6 +43,17 @@ body {
     position: relative;
     border-bottom: 1px solid #eee;
 }
+#frame {
+    position: fixed;
+    top: 0px;
+    right: -1px;
+    width: auto;
+    max-width: 400px;
+    height: 100px;
+    background: #f2f2f2;
+    
+}
+
 p {
     font-family: Arial, sans-serif;
     color: #666;

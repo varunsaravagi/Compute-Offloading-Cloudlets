@@ -26,6 +26,9 @@
         </p>
     </div>
 
+    <div id="frame">
+        <p id="fps"></p>
+    </div>
     <div id="controls">
         <p>
             <table>
@@ -110,7 +113,7 @@
             </table>
             <button id="set" onclick="start()"> Set </button>
         </p>
-    </div >
+    </div>
 
     <script type="text/javascript">
         function printValue(slider, textBox){
@@ -118,9 +121,9 @@
             document.getElementById(textBox).value = sValue;
         };
 
-        window.onload = function (){
-            printValue('mouse_influence', 'mi_text');
-        };
+         window.onload = function (){
+             printValue('mouse_influence', 'mi_text');
+         };
 
     </script>
     <script type="text/javascript">
@@ -129,12 +132,10 @@
             document.getElementById('info').style.display = 'none';
             return false;
         };
-
-        
-
     </script>
-    
+    <script type="text/javascript" src="js/fps.js"></script>
     <script type="text/javascript" src="js/Cloth.js"></script>
+
 </body>
 
 </html>
