@@ -1,4 +1,6 @@
 
+var socket = io.connect();
+
 // global parameters
 var parameters = {
 	physics_accuracy : 3, 
@@ -49,7 +51,7 @@ function load_variables(){
     parameters.tear_distance = parseInt(document.getElementById('td_text').value);//60;
     canvas.width = parseInt(document.getElementById('caw_text').value);
     canvas.height = parseInt(document.getElementById('cah_text').value);
-
+    socket.emit('load_parameters', {'parameters' : parameters});
 };
 
 // Define a point and initialize certain properties
@@ -84,6 +86,18 @@ Point.prototype.pin = function (pinx, piny) {
     this.pin_y = piny;
 };
 
+// draw the point
+Point.prototype.draw = function () {
+
+    // Do not draw the top most points
+    if (this.constraints.length <= 0) 
+        return;
+
+    var i = this.constraints.length;
+    // Draw points for each constraint this point has
+    while (i--) 
+        this.constraints[i].draw();
+};
 
 // Initialize constraint
 var Constraint = function (p1, p2) {
@@ -92,6 +106,14 @@ var Constraint = function (p1, p2) {
     this.p2 = p2;
     this.length = spacing;
 };
+
+
+Constraint.prototype.draw = function () {
+
+    ctx.moveTo(this.p1.x, this.p1.y);
+    ctx.lineTo(this.p2.x, this.p2.y);
+};
+
 
 // Define a cloth
 var Cloth = function () {
@@ -130,39 +152,67 @@ var Cloth = function () {
 
 
 
-//------ Changed Function---------------
 
-// update the cloth based on mouse events being performed on screen
-function update_cloth(cloth_local) {
-	var i = parameters.physics_accuracy;
+// Draw the cloth
+Cloth.prototype.draw = function () {
 
-    // Resolve the constraints for all the points physics_accuracy number of times
-    while (i--) {
-        var p = cloth_local.points.length;
-        while (p--) 
-            cloth_local.points[p].resolve_constraints();
-    }
+    ctx.beginPath();
 
-    i = cloth_local.points.length;
-    
-    // update all the points by delta amount.
+    var i = cloth.points.length;
+    // Loop over all the points and draw each point
     while (i--) 
-        cloth_local.points[i].update(.016);
+        cloth.points[i].draw();
 
-    return cloth_local;
+    ctx.stroke();
 };
+
+
+//------ Changed Function---------------
+//------- MOVED TO SERVER --------
+// update the cloth based on mouse events being performed on screen
+// function update_cloth(cloth_local) {
+// 	var i = parameters.physics_accuracy;
+
+//     // Resolve the constraints for all the points physics_accuracy number of times
+//     while (i--) {
+//         var p = cloth_local.points.length;
+//         while (p--)
+//             resolve_constraints(cloth_local.points[p]); 
+//     }
+
+//     i = cloth_local.points.length;
+    
+//     // update all the points by delta amount.
+//     while (i--) 
+//         update_point(cloth_local.points[i], .016);
+
+//     return cloth_local;
+// };
+
+var t = new timer();
+var startTime;
 
 // update the simulation
 function update_simulation() {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    cloth = update_cloth(cloth);
+    // call this method on the server side
+    //cloth = update_cloth(cloth);
+    console.log('Emitting update event');
+    for(var i=0;i<cloth.points.length;i++){
+        console.log('Emitting ' + i);
+        socket.emit('update_cloth', {'point' : cloth.points[i]});
+    }
+    console.log('Emit successful');
+    socket.on('cloth_updated', function(data){
+
+    });
     //cloth.update();
     cloth.draw();
     var end = new Date().getTime();
     //console.log("Update finished: Time taken " + (end-start));
-    requestAnimFrame(update);
+    requestAnimFrame(update_simulation);
     t.tick(new Date().getTime());
     if(end-startTime > 1000){
         startTime = new Date().getTime();
