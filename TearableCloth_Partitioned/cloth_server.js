@@ -3,6 +3,7 @@
  var fs = require('fs');
  var path = require('path');
  var server = http.createServer(handler);
+ var msgpack = require('msgpack-js-browser');
 
  function handler(req, res) {
  	var filePath = __dirname + '/index.html';
@@ -54,22 +55,116 @@ var cloth = {
     points: []
 
 };
-
 io.sockets.on('connection', function(socket){
 	
 	socket.on('load_parameters', function(data){
 		parameters = data.parameters;
 		console.log("Parameters received. physics_accuracy = " + parameters.physics_accuracy);
+        // cloth = new Cloth();
+        // console.log('Cloth length: ' + cloth.points.length)
+        // console.log('Point 0:');
+        // console.log(cloth.points[0]);
+        // console.log('Point 1:');
+        // console.log(cloth.points[1]);
+        // console.log('Point 1 constraints:');
+        // console.log(cloth.points[1].constraints[0]);
+        // var encoded = msgpack.encode(cloth.points[1]);
 	});
 
     socket.on('update_cloth', function(data){
         cloth.points.push(data.point);
+        console.log('Received length: ' + cloth.points.length);
         //var cloth = data.cloth;
         //console.log('hello');
         //console.log(data.cloth.x);
     });
 
 }); // end io.sockets.on
+
+// Copied Client code to test serialization via msgpack.
+// Gives call stack size exceeded error
+
+// Define a point and initialize certain properties
+var Point = function (x, y) {
+
+    this.x = x;
+    this.y = y;
+    this.px = x;
+    this.py = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.pin_x = null;
+    this.pin_y = null;
+
+    this.constraints = [];
+};
+
+// add the input point as a constraint to this point.
+// A point is attached to atmost 2 points:
+// one on its left and one immediately above it.
+Point.prototype.attach = function (point) {
+    console.log('Attached to point(' + this.x + ', ' + this.y + '), point(' + point.x + ', ' + point.y + ')');
+    // add the point as a constraint 
+    this.constraints.push(point);
+    // this.constraints.push(
+    //     new Constraint(this, point)
+    // );
+};
+
+// Set the coordinates where the point is to be pinned
+// Only applicable for the top row points of the cloth
+Point.prototype.pin = function (pinx, piny) {
+    console.log('Pinned point (' + this.x + ', ' + this.y + ') at (' + pinx + ', ' + piny);
+    this.pin_x = pinx;
+    this.pin_y = piny;
+};
+
+
+// Initialize constraint
+var Constraint = function (p1, p2) {
+
+    this.p1 = p1;
+    this.p2 = p2;
+    this.length = parameters.spacing;
+};
+
+var Cloth = function () {
+
+    // store all the points in the cloth
+    this.points = [];
+
+    var start_x = 560 / 2 - parameters.cloth_width * parameters.spacing / 2;
+
+    // generate point for every combination of (x,y)
+    for (var y = 0; y <= 2; y++) {
+        console.log('y: ' + y);
+        console.log('------------');
+        for (var x = 0; x <= 2; x++) {
+            console.log('x: ' + x)
+            //Position of the point
+            var p = new Point(start_x + x * parameters.spacing, parameters.start_y + y * parameters.spacing);
+            console.log('Point created ' + p.x + ', ' + p.y);
+
+            // if it is not the first point in the row, attach it with the point just before it
+            x != 0 && p.attach(this.points[this.points.length - 1]);
+
+            // if it is the first row, pin the point at the coordinate. This is to keep the cloth
+            // attached from the top.
+            y == 0 && p.pin(p.x, p.y);
+            
+            // if it is not the first row, attach the point to the point just above it in the matrix
+            // |.|.|.|.|.|
+            // |.|.|i|.|.|
+            // |.|.|p|.|.|
+            // attach p to i.
+            y != 0 && p.attach(this.points[x + (y - 1) * (parameters.cloth_width + 1)])
+
+            this.points.push(p);
+            console.log('Constraints:' + p.constraints);
+        }
+    }
+};
+
 
 // Add update property to Point
 function update_point(point, delta) {
@@ -128,7 +223,7 @@ function resolve_point_constraints(point){
     // Get the number of constraints. Would be maximum 2
     var i = point.constraints.length;
     while (i--) 
-    	point.contraints[i] = resolve_constraint(point.contraints[i]);
+    	point.constraints[i] = resolve_constraint(point.constraints[i]);
 
     // if the point is going outside the boundary, 
     // give it a position within the boundary.

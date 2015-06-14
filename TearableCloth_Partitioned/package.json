@@ -9,6 +9,7 @@
   "author": "varun saravagi <vsaravag@andrew.cmu.edu>",
   "license": "ISC",
   "dependencies": {
+    "msgpack-js-browser": "^0.1.4",
     "node-dev": "^2.6.2",
     "socket.io": "^1.3.5"
   }

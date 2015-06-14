@@ -28,6 +28,7 @@
 
     <div id="frame">
         <p id="fps"></p>
+        <p id="fpsAv"></p>
     </div>
     <div id="controls">
         <p>
@@ -56,16 +57,16 @@
 
                 <tr>
                     <td> Cloth Height </td>
-                    <td> <input type = "range" id="cloth_height" min="30" max="300" value="30" step="10"
+                    <td> <input type = "range" id="cloth_height" min="30" max="300" value="60" step="10"
                         onchange="printValue('cloth_height','ch_text')"></td>
-                    <td> <input type = "text" id="ch_text" disabled="disabled" size="4" value="30"></td>
+                    <td> <input type = "text" id="ch_text" disabled="disabled" size="4" value="60"></td>
                 </tr>
 
                 <tr>
                     <td> Cloth Width </td>
-                    <td> <input type = "range" id="cloth_width" min="50" max="500" value="50" step="10"
+                    <td> <input type = "range" id="cloth_width" min="50" max="500" value="90" step="10"
                         onchange="printValue('cloth_width','cw_text')"></td>
-                    <td> <input type = "text" id="cw_text" disabled="disabled" size="4" value="50"></td>
+                    <td> <input type = "text" id="cw_text" disabled="disabled" size="4" value="90"></td>
                 </tr>
 
                 <tr>
@@ -136,6 +137,7 @@
     <script src="/socket.io/socket.io.js"></script>
      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
     <script type="text/javascript" src="js/fps.js"></script>
+    <script type="text/javascript" src="node_modules/msgpack-js-browser/msgpack.js"></script>
     <script type="text/javascript" src="js/cloth_client.js"></script>
 
 </body>

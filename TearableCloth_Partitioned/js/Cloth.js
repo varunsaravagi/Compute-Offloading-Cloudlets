@@ -138,7 +138,8 @@ Point.prototype.draw = function () {
     var i = this.constraints.length;
     // Draw points for each constraint this point has
     while (i--) 
-        this.constraints[i].draw();
+        //this.constraints[i].draw();
+        this.constraints[i].draw(this);
 };
 
 // Resolve the constraints of the point with the attached points
@@ -155,8 +156,8 @@ Point.prototype.resolve_constraints = function () {
     // Get the number of constraints. Would be maximum 2
     var i = this.constraints.length;
     while (i--) 
-        this.constraints[i].resolve();
-
+        //this.constraints[i].resolve();
+        this.constraints[i].resolve(this);
     // if the point is going outside the boundary, 
     // give it a position within the boundary.
 
@@ -183,8 +184,11 @@ Point.prototype.resolve_constraints = function () {
 Point.prototype.attach = function (point) {
 
     this.constraints.push(
-        new Constraint(this, point)
+        new Constraint(point)
     );
+    // this.constraints.push(
+    //     new Constraint(this, point)
+    // );
 };
 
 // remove the given link from the point
@@ -209,43 +213,54 @@ Point.prototype.pin = function (pinx, piny) {
     this.pin_y = piny;
 };
 
-var Constraint = function (p1, p2) {
+var Constraint = function (p2) {
 
-    this.p1 = p1;
+    //this.p1 = p1;
     this.p2 = p2;
     this.length = spacing;
 };
 
 // Resolve the constraint
-Constraint.prototype.resolve = function () {
+Constraint.prototype.resolve = function (point) {
 
     // Get the new distance between the two points in the constraint
-    var diff_x = this.p1.x - this.p2.x,
-        diff_y = this.p1.y - this.p2.y,
+    var diff_x = point.x - this.p2.x,
+        diff_y = point.y - this.p2.y,
         dist = Math.sqrt(diff_x * diff_x + diff_y * diff_y),
         //Get the difference from the length. No idea why this formula was used
         diff = (this.length - dist) / dist;
 
+    // var diff_x = this.p1.x - this.p2.x,
+    //     diff_y = this.p1.y - this.p2.y,
+    //     dist = Math.sqrt(diff_x * diff_x + diff_y * diff_y),
+    //     //Get the difference from the length. No idea why this formula was used
+    //     diff = (this.length - dist) / dist;
+
     // if distance between points is > tear distance, remove the constraint,
     // i.e detach the points     
-    if (dist > tear_distance) this.p1.remove_constraint(this);
+    //TEMPORARY COMMENT
+    if (dist > tear_distance) 
+        point.remove_constraint(this);
 
     // calculate the amount by which positions are to be changed.
     var px = diff_x * diff * 0.5;
     var py = diff_y * diff * 0.5;
 
     // add the difference to first point
-    this.p1.x += px;
-    this.p1.y += py;
+    point.x += px;
+    point.y += py;
     // subtract the difference from second point
     this.p2.x -= px;
     this.p2.y -= py;
 };
 
-Constraint.prototype.draw = function () {
+Constraint.prototype.draw = function (point) {
 
-    ctx.moveTo(this.p1.x, this.p1.y);
-    ctx.lineTo(this.p2.x, this.p2.y);
+    ctx.moveTo(point.x, point.y);
+    ctx.lineTo(point.x, this.p2.y);
+
+    // ctx.moveTo(this.p1.x, this.p1.y);
+    // ctx.lineTo(this.p2.x, this.p2.y);
 };
 
 var Cloth = function () {
@@ -315,7 +330,7 @@ Cloth.prototype.draw = function () {
 };
 
 var t = new timer();
-var startTime;
+var startTime = 0;
 
 function update() {
     
@@ -330,13 +345,15 @@ function update() {
     if(end-startTime > 1000){
         startTime = new Date().getTime();
         document.getElementById('fps').innerHTML = "FPS: " + t.fps();
+        document.getElementById('fpsAv').innerHTML = "Average FPS: " + t.fpsAv();
+        //t = new timer();
     }
 
     
 }
 
 function start() {
-
+    t = new timer();
     canvas.onmousedown = function (e) {
         mouse.button = e.which;
         mouse.px = mouse.x;

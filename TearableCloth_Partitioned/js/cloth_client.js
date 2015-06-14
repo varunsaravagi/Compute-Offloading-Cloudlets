@@ -73,10 +73,10 @@ var Point = function (x, y) {
 // A point is attached to atmost 2 points:
 // one on its left and one immediately above it.
 Point.prototype.attach = function (point) {
-
-    this.constraints.push(
-        new Constraint(this, point)
-    );
+    this.constraints.push(point);
+    // this.constraints.push(
+    //     new Constraint(this, point)
+    // );
 };
 
 // Set the coordinates where the point is to be pinned
@@ -200,16 +200,18 @@ function update_simulation() {
     // call this method on the server side
     //cloth = update_cloth(cloth);
     console.log('Emitting update event');
-    for(var i=0;i<cloth.points.length;i++){
-        console.log('Emitting ' + i);
-        socket.emit('update_cloth', {'point' : cloth.points[i]});
-    }
+    var compressed = msgpack.encode(cloth);//JSON.stringify(cloth);
+    socket.emit('update_cloth', {'point' : compressed});
+    // for(var i=0;i<cloth.points.length;i++){
+    //     console.log('Emitting ' + i);
+    //     socket.emit('update_cloth', {'point' : cloth.points[i]});
+    // }
     console.log('Emit successful');
-    socket.on('cloth_updated', function(data){
+    //socket.on('cloth_updated', function(data){
 
-    });
+    //});
     //cloth.update();
-    cloth.draw();
+    //cloth.draw();
     var end = new Date().getTime();
     //console.log("Update finished: Time taken " + (end-start));
     requestAnimFrame(update_simulation);

@@ -1,6 +1,8 @@
 function timer() {
 	this.elapsed = 0
 	this.last = null
+	this.fpsAverage = 0
+	this.counter = 0
 }
 
 timer.prototype = {
@@ -10,6 +12,12 @@ timer.prototype = {
 	},
 
 	fps: function(){
-		return Math.round(1/this.elapsed)
+		this.counter += 1;
+		this.fpsAverage += Math.round(1/this.elapsed);
+		return Math.round(1/this.elapsed);
+	},
+
+	fpsAv: function(){
+		return Math.round(this.fpsAverage/this.counter);
 	}
 }
