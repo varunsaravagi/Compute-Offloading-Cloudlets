@@ -329,18 +329,6 @@ Cloth.prototype.update = function () {
     //     sCloth.update(this.points[p], this.points[p].index);
 };
 
-// Draw the cloth
-Cloth.prototype.draw = function () {
-
-    ctx.beginPath();
-
-    var i = cloth.points.length;
-    // Loop over all the points and draw each point
-    while (i--) 
-        cloth.points[i].draw();
-
-    ctx.stroke();
-};
 
 var id = 0;
 var past = 0, now = 0;
@@ -349,6 +337,7 @@ function update(socket) {
     console.log('Time taken for update: ' + (now - past));
     id++;
     cloth.update();
+    past = new Date().getTime();
     var encoded = msgpack.encode(sCloth);
     d = new Date();
     var data = {
@@ -359,5 +348,4 @@ function update(socket) {
     socket.emit('updatedCloth', {param : data});
     
     setTimeout(update, 1000/60, socket);    
-    past = new Date().getTime();
 }
