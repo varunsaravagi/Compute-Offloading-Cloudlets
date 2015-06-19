@@ -57,7 +57,7 @@ var Point = function (x, y, index) {
     this.vy = 0;
     this.pin_x = null;
     this.pin_y = null;
-    this.index = 0;
+    this.index = index;
     this.constraints = [];
 };
 
@@ -106,16 +106,12 @@ io.sockets.on('connection', function(socket){
     
     socket.on('load_parameters', function(data){
         parameters = data.parameters;
-        console.log("Parameters received. physics_accuracy = " + parameters.physics_accuracy);
+        //console.log("Parameters received. physics_accuracy = " + parameters.physics_accuracy);
         sCloth = new SerializedCloth();
         cloth = new Cloth();
         console.log('Cloth length: ' + cloth.points.length)
         console.log('Serialized Cloth length: ' + sCloth.points.length)
-        cloth.update();
-        var length = sCloth.points.length;
-        var encoded = msgpack.encode(sCloth);
-        console.log('Encoded cloth');
-        socket.emit('updatedCloth', {cloth : encoded});
+        update(socket);
     });
 }); // end io.sockets.on
 
@@ -169,6 +165,7 @@ Point.prototype.update = function (delta) {
 
     this.vy = this.vx = 0
 
+    sCloth.points[this.index].update(this);
 
 };
 
@@ -327,6 +324,9 @@ Cloth.prototype.update = function () {
     // update all the points by delta amount. Brings swaying motion to the cloth
     while (i--) 
         this.points[i].update(.016);
+    var p = this.points.length;
+    // while(p--)
+    //     sCloth.update(this.points[p], this.points[p].index);
 };
 
 // Draw the cloth
@@ -342,12 +342,22 @@ Cloth.prototype.draw = function () {
     ctx.stroke();
 };
 
-
-function update() {
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+var id = 0;
+var past = 0, now = 0;
+function update(socket) {
+    now = new Date().getTime();
+    console.log('Time taken for update: ' + (now - past));
+    id++;
     cloth.update();
-    cloth.draw();
-
+    var encoded = msgpack.encode(sCloth);
+    d = new Date();
+    var data = {
+        cloth : encoded,
+        id : id,
+        time : d.getTime()
+    };
+    socket.emit('updatedCloth', {param : data});
+    
+    setTimeout(update, 1000/60, socket);    
+    past = new Date().getTime();
 }

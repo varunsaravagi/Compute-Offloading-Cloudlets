@@ -58,16 +58,21 @@ function load_variables(){
     socket.emit('load_parameters', {'parameters' : parameters});
 };
 
+var startTime, endTime;
 socket.on('updatedCloth', function(data){
-    cloth = msgpack.decode(data.cloth);
-    console.log(cloth.points.length);
+    d = new Date();
+    console.log('Id: ' + data.param.id + ' Latency: ' + (d.getTime() - data.param.time));
+    cloth = msgpack.decode(data.param.cloth);
+    startDraw = new Date().getTime();
     draw();
+    console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    
+    //endTime = new Date().getTime();
 });
 
 
 // Draw the cloth
 function draw() {
-
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.beginPath();
 
     var i = cloth.points.length;
