@@ -84,18 +84,19 @@ function update(){
     
 };
 
-
 socket.on('updatedCloth', function(data){
-    d = new Date().getTime();
-    console.log('Received update after ' + (d - data.param.t));
-    //console.log('Id: ' + data.param.id + ' Latency: ' + (d.getTime() - data.param.time));
+    console.log('-----------------------');
+    d = new Date();
+    console.log('Id: ' + data.param.id + ', Received update after ' + (d.getTime()- data.param.t) + ' ms');
+    console.log('Time: ' + d.getHours() + ':' +
+            d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
     //cloth = msgpack.decode(data.param.cloth);
     cloth = data.param.cloth;
     startDraw = new Date().getTime();
     draw();
     console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    
     doEmit = true;
-    socket.emit('updateCloth', {});
+    socket.emit('updateCloth', {t : new Date().getTime()});
 });
 
 // Draw the cloth

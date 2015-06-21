@@ -3,6 +3,7 @@
  var path = require('path');
  var server = http.createServer(handler);
  var msgpack = require('msgpack-js-browser');
+ var sizeof = require('object-sizeof');
 
  function handler(req, res) {
     var filePath = __dirname + '/index.html';
@@ -61,6 +62,9 @@ var Point = function (x, y, index) {
     this.constraints = [];
 };
 
+
+
+
 // Point data structure to pass to client
 var SerializedPoint = function (point){
     this.index = point.index;
@@ -116,8 +120,10 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('updateCloth', function(data){
+        console.log('------------------------');
+        console.log('Received update Event after ' + (new Date().getTime() - data.t));
         now = new Date().getTime();
-        id++   ;
+        id++;
         cloth.update();
         past = new Date().getTime();
         console.log('Time taken for update: ' + (past - now));
@@ -130,10 +136,28 @@ io.sockets.on('connection', function(socket){
             id : id,
             t : d.getTime()
         };
+        console.log('Id: ' + id + ', Event emitted at: ' + d.getHours() +':'+
+            d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
         socket.emit('updatedCloth', {param : data});
     });
 }); // end io.sockets.on
 
+
+var getUTF8Size = function( str ) {
+  var sizeInBytes = str.split('')
+    .map(function( ch ) {
+      return ch.charCodeAt(0);
+    }).map(function( uchar ) {
+      // The reason for this is explained later in
+      // the section “An Aside on Text Encodings”
+      return uchar < 128 ? 1 : 2;
+    }).reduce(function( curr, next ) {
+      return curr + next;
+    });
+ 
+  return sizeInBytes;
+};
+ 
 
 SerializedPoint.prototype.update = function(point){
     this.x = point.x;

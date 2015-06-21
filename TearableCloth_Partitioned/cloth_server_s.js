@@ -333,19 +333,23 @@ Cloth.prototype.update = function () {
 var id = 0;
 var past = 0, now = 0;
 function update(socket) {
+    console.log('------------------------');
     now = new Date().getTime();
-    console.log('Time taken for update: ' + (now - past));
     id++;
     cloth.update();
     past = new Date().getTime();
-    var encoded = msgpack.encode(sCloth);
+    console.log('Time taken for update: ' + (past - now));
+    now = new Date().getTime();
+            //var encoded = msgpack.encode(sCloth);
+            //console.log('Time taken to serialize: ' + (new Date().getTime() - now));
     d = new Date();
     var data = {
-        cloth : encoded,
+        cloth : sCloth,
         id : id,
-        time : d.getTime()
+        t : d.getTime()
     };
+    console.log('Id: ' + id + ', Event emitted at: ' + d.getHours() +':'+
+    d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
     socket.emit('updatedCloth', {param : data});
-    
     setTimeout(update, 1000/60, socket);    
 }

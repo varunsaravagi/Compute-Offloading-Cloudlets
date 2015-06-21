@@ -59,16 +59,46 @@ function load_variables(){
 };
 
 var startTime, endTime;
+socket.on('newCloth', function(data){
+    console.log('Received cloth');
+    cloth = data.cloth;
+    draw();
+    doEmit = true;
+    emit_update();
+});
+
+doEmit = false;
+function emit_update(){
+    if(doEmit){
+        console.log('-----------------------');
+        socket.emit('updateCloth', {});
+        doEmit = false;
+    }
+}
+
+function update(){
+    console.log('-----------------------');
+    
+    socket.emit('updateCloth', {});
+    
+};
+
 socket.on('updatedCloth', function(data){
+    console.log('-----------------------');
     d = new Date();
-    console.log('Id: ' + data.param.id + ' Latency: ' + (d.getTime() - data.param.time));
-    cloth = msgpack.decode(data.param.cloth);
+    decoded = msgpack.decode(data.param);
+    console.log('Id: ' + data.param.id + ', Received update after ' + (d.getTime()- decoded.t) + ' ms');
+    console.log('Time: ' + d.getHours() + ':' +
+            d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
+
+    //cloth = msgpack.decode(data.param.cloth);
+    cloth = decoded.cloth;//data.param.cloth;
     startDraw = new Date().getTime();
     draw();
     console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    
-    //endTime = new Date().getTime();
+    doEmit = true;
+    socket.emit('updateCloth', {t : new Date().getTime()});
 });
-
 
 // Draw the cloth
 function draw() {
@@ -84,12 +114,16 @@ function draw() {
 };
 
 function draw_points(point){
-    if(point.constraints.length === 0)
+    if(point.length < 2)
         return;
-    var i = point.constraints.length;
-    while(i--){
-        ctx.moveTo(point.x, point.y);
-        ctx.lineTo(point.constraints[i].x, point.constraints[i].y);    
+    // get the number of constraint points
+    // (point.length - 2) would give the number of entries for the constraint.
+    // Divide by 2 to get the number of constraint pair
+    var i = (point.length - 2) / 2;
+
+    for(var j=0;j<=i;j=j+2){
+        ctx.moveTo(point[0], point[1]);
+        ctx.lineTo(point[j+2], point[j+3]);    
     }
     
 }
@@ -104,11 +138,14 @@ function start() {
         mouse.x = e.clientX - rect.left,
         mouse.y = e.clientY - rect.top,
         mouse.down = true;
+        socket.emit('mouse', {mouseData:mouse});
         e.preventDefault();
+        
     };
 
     canvas.onmouseup = function (e) {
         mouse.down = false;
+        socket.emit('mouse', {mouseData:mouse});
         e.preventDefault();
     };
 
@@ -118,6 +155,7 @@ function start() {
         var rect = canvas.getBoundingClientRect();
         mouse.x = e.clientX - rect.left,
         mouse.y = e.clientY - rect.top,
+        socket.emit('mouse', {mouseData:mouse});
         e.preventDefault();
     };
 
@@ -133,9 +171,9 @@ function start() {
     
     load_variables();    
     // Define the points and constraints in the cloth
-    cloth = new Cloth();
-    startTime = new Date().getTime();
-    update_simulation();
+    //cloth = new Cloth();
+    //startTime = new Date().getTime();
+    //update_simulation();
 }
 
 // call this function when the window loads
@@ -157,7 +195,8 @@ window.onload = function () {
         var rect = canvas.getBoundingClientRect();
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
-        mouse.down = true;  
+        mouse.down = true;
+        socket.emit('mouse', {mouseData:mouse});  
     }, false);
 
     // detect touch movement
@@ -170,7 +209,8 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         event.preventDefault();
-        console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");  
+        socket.emit('mouse', {mouseData:mouse});
+        //console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");  
     }, false);
 
     // detect end of touch
@@ -178,8 +218,8 @@ window.onload = function () {
         event.preventDefault();        
         mouse.down = false;
         event.preventDefault();
+        socket.emit('mouse', {mouseData:mouse});
     }, false);
 
-    load_variables();  
-    //start();
+    start();
 };
