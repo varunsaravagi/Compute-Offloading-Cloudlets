@@ -452,8 +452,7 @@ Manager.prototype.destroy = function(socket){
 
 Manager.prototype.packet = function(packet){
   t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
+      time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
   debug('writing packet %j @ %s', packet, time);
   var self = this;
 
@@ -872,8 +871,7 @@ Socket.prototype.onpacket = function(packet){
 Socket.prototype.onevent = function(packet){
   var args = packet.data || [];
   t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
+      time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
   debug('emitting event %j @ %s', args, time);
 
   if (null != packet.id) {
@@ -1331,10 +1329,21 @@ Emitter.prototype.removeEventListener = function(event, fn){
  */
 
 Emitter.prototype.emit = function(event){
+  if(event == "packet"){
+    t = new Date();
+    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
+    console.log('Inside Emitter.prototype.emit: emitting ' + event + ' @ ' + time);
+  }
   this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
+  var args = [].slice.call(arguments, 1);
+  if(event == "packet"){
+    t = new Date();
+    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
+    console.log('Inside Emitter.prototype.emit, made args for ' + event + ' @ ' + time);  
+  }
 
+  var callbacks = this._callbacks[event];
+  
   if (callbacks) {
     callbacks = callbacks.slice(0);
     for (var i = 0, len = callbacks.length; i < len; ++i) {
@@ -1396,14 +1405,10 @@ function debug(name) {
     var ms = curr - (debug[name] || curr);
     debug[name] = curr;
 
-    t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
-
     fmt = name
       + ' '
       + fmt
-      + ' +' + debug.humanize(ms+' @ '+time);
+      + ' +' + debug.humanize(ms);
 
     // This hackery is required for IE8
     // where `console.log` doesn't have 'apply'
@@ -1938,8 +1943,7 @@ Socket.prototype.onOpen = function () {
 Socket.prototype.onPacket = function (packet) {
   if ('opening' == this.readyState || 'open' == this.readyState) {
     t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
+      time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
     debug('socket receive: type "%s", data "%s" @ %s', packet.type, packet.data, time);
 
     this.emit('packet', packet);
@@ -1963,8 +1967,20 @@ Socket.prototype.onPacket = function (packet) {
         break;
 
       case 'message':
+        // t = new Date();
+        // time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
+        //debug('Emitting data @ %s', time);
         this.emit('data', packet.data);
+        // t = new Date();
+        // time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
+        //debug('Emitting message @ %s', time);
+        
         this.emit('message', packet.data);
+
+        // t = new Date();
+        // time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
+        //debug('Message emitted @ %s', time);
+
         break;
     }
   } else {
@@ -2075,10 +2091,7 @@ Socket.prototype.onDrain = function() {
 Socket.prototype.flush = function () {
   if ('closed' != this.readyState && this.transport.writable &&
     !this.upgrading && this.writeBuffer.length) {
-    t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
-    debug('flushing %d packets in socket @ %s', this.writeBuffer.length, time);
+    debug('flushing %d packets in socket', this.writeBuffer.length);
     this.transport.send(this.writeBuffer);
     // keep track of current length of writeBuffer
     // splice writeBuffer and callbackBuffer on `drain`
@@ -5841,9 +5854,8 @@ function Encoder() {}
 
 Encoder.prototype.encode = function(obj, callback){
   t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
-  debug('encoding packet %j @ %s', obj, time);
+      time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
+  debug('encoding packet %j @ %s', obj,time);
 
   if (exports.BINARY_EVENT == obj.type || exports.BINARY_ACK == obj.type) {
     encodeAsBinary(obj, callback);
@@ -5896,9 +5908,8 @@ function encodeAsString(obj) {
     if (nsp) str += ',';
     str += json.stringify(obj.data);
   }
-  t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
+t = new Date();
+      time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
   debug('encoded %j as %s @ %s', obj, str, time);
   return str;
 }
@@ -6049,10 +6060,8 @@ function decodeString(str) {
       return error();
     }
   }
-
-  t = new Date();
-    time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds(); 
-    
+t = new Date();
+      time = t.getHours() +':'+ t.getMinutes() + ':' + t.getSeconds() + ':' + t.getMilliseconds();
   debug('decoded %s as %j @ %s', str, p, time);
   return p;
 }
