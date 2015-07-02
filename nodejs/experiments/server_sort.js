@@ -4,6 +4,7 @@
  	var http = require('http');
  	var fs = require('fs');
  	var server = http.createServer(handler);
+ 	var sizeof = require('object-sizeof');
 
  	function handler(req, res) {
  		console.log('Connection successful');

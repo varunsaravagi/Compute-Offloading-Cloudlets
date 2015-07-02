@@ -17,9 +17,9 @@ TC=/sbin/tc
 IF=lo
 
 # Download and Upload Bandwidth
-DNLD=10kbit
-UPLD=10kbit
-LATENCY=1000ms
+DNLD=100mbit
+UPLD=100mbit
+LATENCY=100ms
 
 # Destination Host
 IP=127.0.0.1
