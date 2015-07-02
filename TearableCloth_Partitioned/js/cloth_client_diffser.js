@@ -1,3 +1,7 @@
+/* This is the client side javascript file of cloth_server_diffser. It gets the points from 
+the server and draws them.
+*/
+
 
 var socket = io.connect();
 
@@ -86,13 +90,14 @@ function update(){
 socket.on('updatedCloth', function(data){
     console.log('-----------------------');
     d = new Date();
-    decoded = msgpack.decode(data.param);
-    console.log('Id: ' + data.param.id + ', Received update after ' + (d.getTime()- decoded.t) + ' ms');
+    //decoded = msgpack.decode(data.param);
+    console.log('Id: ' + data.param.id + ', Received update after ' + (d.getTime()- data.param.t) + ' ms');
     console.log('Time: ' + d.getHours() + ':' +
             d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
 
     //cloth = msgpack.decode(data.param.cloth);
-    cloth = decoded.cloth;//data.param.cloth;
+    //cloth = decoded.cloth;
+    cloth = data.param.cloth;
     startDraw = new Date().getTime();
     draw();
     console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    

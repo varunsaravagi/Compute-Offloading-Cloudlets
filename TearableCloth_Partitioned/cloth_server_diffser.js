@@ -1,3 +1,12 @@
+ /* This file uses a new serialization mechanism than the cloth_server_c and cloth_server_s
+ files. The new data structure consists of an array representing the points required to
+ draw the cloth. A point would have maximum of 6 points: self coordinates x and y, and coordinates
+ of the constraint points (0, 1 or 2 constraint points).
+
+ Result: The performance is better than the two mentioned files but not upto the expectation. The
+ rendering is about 8-10 fps.
+ */
+
  var http = require('http');
  var fs = require('fs');
  var path = require('path');
@@ -113,12 +122,12 @@ io.sockets.on('connection', function(socket){
             id : id,
             t : d.getTime()
         };
-        encoded = msgpack.encode(data);
+        //encoded = msgpack.encode(data);
         console.log('Time taken to encode: ' + (new Date().getTime() - d.getTime()));
         console.log('Size of data: ' + sizeof(data));
         console.log('Id: ' + id + ', Event emitted at: ' + d.getHours() +':'+
             d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
-        socket.emit('updatedCloth', {param : encoded});
+        socket.emit('updatedCloth', {param : data});
     });
 
     socket.on('mouse', function(data){

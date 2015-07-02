@@ -1,4 +1,6 @@
-
+/* This is the client side of cloth_server_s. It gets the updated points from the server
+and displays them.
+*/
 var socket = io.connect();
 
 // global parameters

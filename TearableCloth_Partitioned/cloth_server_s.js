@@ -1,3 +1,12 @@
+ /* This file issues the update commands from the server at every 1000/60 ms. This is the timeout 
+ interval set for the update function, it is not necessary that the update is happening at this
+ rate only. The next update happens only when the current update has finished.
+
+ The serialization mechanism uses typed array to represent the points and the constraint points.
+ The performance is not good and the data being transmitted is also of the size of ~700KB.
+ */
+
+
  var http = require('http');
  var fs = require('fs');
  var path = require('path');

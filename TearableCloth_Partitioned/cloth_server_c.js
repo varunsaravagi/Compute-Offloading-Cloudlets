@@ -1,3 +1,7 @@
+ /* This is similar to cloth_server_s, with the difference being the update is being triggered by the client.
+ The serialization mechanism remains the same as in cloth_server_s file.
+ */
+ 
  var http = require('http');
  var fs = require('fs');
  var path = require('path');

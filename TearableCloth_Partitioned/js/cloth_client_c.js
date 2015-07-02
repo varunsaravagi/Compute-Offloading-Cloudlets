@@ -1,4 +1,5 @@
-
+/* This is the client side of cloth_server_c. 
+*/
 var socket = io.connect();
 
 // global parameters
