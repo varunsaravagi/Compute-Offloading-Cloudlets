@@ -3,30 +3,33 @@
 
 <head>
     <title>Tearable Cloth</title>
-
-    <link rel="stylesheet" type="text/css" href="style.css" />
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
 
 </head>
 
 <body>
 
     <canvas id="c"></canvas>
-
-    <a target="_blank" href="http://codepen.io/suffick/pen/fhjvk" id="p">Like playing with physics? Click here!</a>
-
     <div id="info">
-        <div id="top">            
-            <a id="close" href="">close</a>
-        </div>
-        <p>
-            <br>- Tear the cloth with your mouse.
-            <br>
-            <br>- Right click and drag to cut the cloth
-            <br>
-            <br>- Reduce physics_accuracy if it's laggy.
-            <br>
-            <br>
-        </p>
+        <table>
+          <tr>
+            <td>E-E Latency </td>
+            <td><input type="text" id="elatency" disabled="disabled" size="4"></td>
+          </tr>
+          <tr>
+            <td>Network Latency </td>
+            <td><input type="text" id="nlatency" disabled="disabled" size="4"></td>
+          </tr>
+          <tr>
+            <td>FPS </td>
+            <td><input type="text" id="fps" disabled="disabled" size="4"></td>
+          </tr>
+          <tr>
+            <td>Bandwidth </td>
+            <td><input type="text" id="bandwidth" disabled="disabled" size="4"></td>
+          </tr>
+        </table>
     </div>
 
     <div id="controls">
@@ -56,16 +59,16 @@
 
                 <tr>
                     <td> Cloth Height </td>
-                    <td> <input type = "range" id="cloth_height" min="30" max="300" value="30" step="10"
+                    <td> <input type = "range" id="cloth_height" min="30" max="300" value="60" step="10"
                         onchange="printValue('cloth_height','ch_text')"></td>
-                    <td> <input type = "text" id="ch_text" disabled="disabled" size="4" value="30"></td>
+                    <td> <input type = "text" id="ch_text" disabled="disabled" size="4" value="60"></td>
                 </tr>
 
                 <tr>
                     <td> Cloth Width </td>
-                    <td> <input type = "range" id="cloth_width" min="50" max="500" value="50" step="10"
+                    <td> <input type = "range" id="cloth_width" min="50" max="500" value="90" step="10"
                         onchange="printValue('cloth_width','cw_text')"></td>
-                    <td> <input type = "text" id="cw_text" disabled="disabled" size="4" value="50"></td>
+                    <td> <input type = "text" id="cw_text" disabled="disabled" size="4" value="90"></td>
                 </tr>
 
                 <tr>
@@ -87,7 +90,7 @@
                     <td> <input type = "range" id="spacing" min="1" max="50" value="3" step="1"
                         onchange="printValue('spacing','s_text')"></td>
                     <td> <input type = "text" id="s_text" disabled="disabled" size="4" value="3"></td>
-                </tr>                              
+                </tr>
 
                 <tr>
                     <td> Tear Distance </td>
@@ -113,7 +116,7 @@
             </table>
             <button id="set" onclick="start()"> Set </button>
         </p>
-    </div >
+    </div>
 
     <script type="text/javascript">
         function printValue(slider, textBox){
@@ -121,23 +124,18 @@
             document.getElementById(textBox).value = sValue;
         };
 
-        window.onload = function (){
-            printValue('mouse_influence', 'mi_text');
-        };
+         window.onload = function (){
+             printValue('mouse_influence', 'mi_text');
+         };
 
     </script>
-    <script type="text/javascript">
-        document.getElementById('close').onmousedown = function(e) {
-            e.preventDefault();
-            document.getElementById('info').style.display = 'none';
-            return false;
-        };
 
-        
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
+    <script type="text/javascript" src="js/fps.js"></script>
+    <script type="text/javascript" src="js/result.js"></script>
+    <script type="text/javascript" src="js/Cloth.js"></script>
 
-    </script>
-    
-    <script type="text/javascript" src="Cloth.js"></script>
 </body>
 
 </html>

@@ -12,24 +12,26 @@
 
     <canvas id="c"></canvas>
     <div id="info">
-        <div id="top">            
-            <a id="close" href="">close</a>
-        </div>
-        <p>
-            <br>- Tear the cloth with your mouse.
-            <br>
-            <br>- Right click and drag to cut the cloth
-            <br>
-            <br>- Reduce physics_accuracy if it's laggy.
-            <br>
-            <br>
-        </p>
+        <table>
+          <tr>
+            <td>E-E Latency </td>
+            <td><input type="text" id="elatency" disabled="disabled" size="4"></td>
+          </tr>
+          <tr>
+            <td>Network Latency </td>
+            <td><input type="text" id="nlatency" disabled="disabled" size="4"></td>
+          </tr>
+          <tr>
+            <td>FPS </td>
+            <td><input type="text" id="fps" disabled="disabled" size="4"></td>
+          </tr>
+          <tr>
+            <td>Bandwidth </td>
+            <td><input type="text" id="bandwidth" disabled="disabled" size="4"></td>
+          </tr>
+        </table>
     </div>
 
-    <div id="frame">
-        <p id="fps"></p>
-        <p id="fpsAv"></p>
-    </div>
     <div id="controls">
         <p>
             <table>
@@ -88,7 +90,7 @@
                     <td> <input type = "range" id="spacing" min="1" max="50" value="3" step="1"
                         onchange="printValue('spacing','s_text')"></td>
                     <td> <input type = "text" id="s_text" disabled="disabled" size="4" value="3"></td>
-                </tr>                              
+                </tr>
 
                 <tr>
                     <td> Tear Distance </td>
@@ -127,20 +129,11 @@
          };
 
     </script>
-    <script type="text/javascript">
-        document.getElementById('close').onmousedown = function(e) {
-            e.preventDefault();
-            document.getElementById('info').style.display = 'none';
-            return false;
-        };
-    </script>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
     <script type="text/javascript" src="js/fps.js"></script>
+    <script type="text/javascript" src="js/result.js"></script>
     <script type="text/javascript" src="node_modules/msgpack-js-browser/msgpack.js"></script>
-    <script type="text/javascript" src="node_modules/debug/bundle.js"></script>
     <script src="node_modules/binaryjs/dist/binary.js"></script>
     <script type="text/javascript" src="js/cloth_client_binary.js"></script>
-
 </body>
 
 </html>

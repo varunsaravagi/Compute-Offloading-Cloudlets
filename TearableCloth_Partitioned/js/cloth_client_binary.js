@@ -1,12 +1,12 @@
-/* This is the client side javascript file of cloth_server_binary. It gets the points from 
+/* This is the client side javascript file of cloth_server_binary. It gets the points from
 the server and draws them.
 */
 
 
-var client   = new BinaryClient('ws://128.237.190.151:1234');
+var client   = new BinaryClient('ws://localhost:1234');
 // global parameters
 var parameters = {
-	physics_accuracy : 3, 
+	physics_accuracy : 3,
     mouse_influence : 20,
     mouse_cut : 5,
     gravity : 1200,
@@ -60,8 +60,12 @@ function load_variables(){
     canvas.height = parseInt(document.getElementById('cah_text').value);
     parameters.canvas_width = canvas.width;
     parameters.canvas_height = canvas.height;
-    
+
 };
+
+
+var fps = new timer();
+var result = new dataPoints();
 
 function start_sim(){
     var param = {
@@ -70,36 +74,23 @@ function start_sim(){
     }
     encoded = msgpack.encode(param);
     stream = client.send({buffer : encoded}, 'load_parameters');
-    
+
     stream.on('data', function(data){
-        d = new Date();        
-        t = d.getHours() + ':'+ d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds();
-        
-        console.log('Received stream at: ' + t);
-        var decoded = msgpack.decode(data.buffer);
-        console.log(decoded);
-        cloth = decoded;
+        //console.log('Received stream at: ' + t);
+        var rcvData = msgpack.decode(data.buffer);
+        //console.log(decoded);
+
+				cloth = rcvData.cloth;
         draw();
-        emit_update(stream);
-        // switch(decoded.id){
 
-        //     case 'newCloth':
-        //         cloth = decoded.cloth;
-        //         draw();
-        //         emit_update(stream);
-        //         break;
+				eteLatency = new Date().getTime() - rcvData.time;
+				fps.tick(new Date().getTime());
 
-        //     case 'updatedCloth':
-        //         cloth = decoded.cloth;
-        //         draw();
-        //         emit_update(stream);
-        //         break;
-        // }   
+				result.add(eteLatency, 0, fps.fps(), 0);
+
+				emit_update(stream);
     });
 }
-
-
-var startTime, endTime;
 
 function emit_update(stream){
     var param = {
@@ -111,29 +102,6 @@ function emit_update(stream){
 }
 
 
-function render(data){
-    d = new Date();
-    console.log('Event received at: ' + d.getHours() + ':' +
-            d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
-
-    d = new Date();
-    console.log('Event emitted at: ' + d.getHours() + ':' +
-            d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
-
-    client.send(d.getTime(), 'updateCloth');
-    startTime = new Date().getTime();
-    cloth = msgpack.decode(data.buffer);
-    endTime = new Date().getTime();
-    console.log('Time taken for decode: ' + (endTime-startTime));
-   
-    startDraw = new Date().getTime();
-    draw();
-    console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    
-    
-    doEmit = true;
-    console.log('-----------------------');
-};
-
 // Draw the cloth
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -141,7 +109,7 @@ function draw() {
 
     var i = cloth.length;
     // Loop over all the points and draw each point
-    while (i--) 
+    while (i--)
         draw_points(cloth[i]);
 
     ctx.stroke();
@@ -157,9 +125,9 @@ function draw_points(point){
 
     for(var j=0;j<=i;j=j+2){
         ctx.moveTo(point[0], point[1]);
-        ctx.lineTo(point[j+2], point[j+3]);    
+        ctx.lineTo(point[j+2], point[j+3]);
     }
-    
+
 }
 
 function send_mouse(){
@@ -183,7 +151,7 @@ function start() {
         mouse.down = true;
         send_mouse();
         e.preventDefault();
-        
+
     };
 
     canvas.onmouseup = function (e) {
@@ -211,9 +179,9 @@ function start() {
     boundsy = canvas.height - 1;
 
     ctx.strokeStyle = '#888';
-    
+
     load_variables();
-    start_sim();    
+    start_sim();
 }
 
 // call this function when the window loads
@@ -250,12 +218,12 @@ window.onload = function () {
         mouse.y = touch.clientY - rect.top,
         event.preventDefault();
         client.send(mouse, 'mouse');
-        //console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");  
+        //console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");
     }, false);
 
     // detect end of touch
     canvas.addEventListener("touchend", function(event){
-        event.preventDefault();        
+        event.preventDefault();
         mouse.down = false;
         event.preventDefault();
         client.send(mouse, 'mouse');
@@ -263,3 +231,11 @@ window.onload = function () {
 
     start();
 };
+
+window.setInterval(function(){
+	document.getElementById('elatency').value = result.avElatency();
+	document.getElementById('fps').value = result.avFps();
+	document.getElementById('nlatency').value = result.avNlatency();
+	document.getElementById('bandwidth').value = result.avBandwidth();
+	result.reset();
+}, 1000);

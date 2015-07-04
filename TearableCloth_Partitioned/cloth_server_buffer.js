@@ -1,8 +1,8 @@
  /* This file uses a Buffer to store the points and transmit them over the server.
- 
+
  Result: The update function takes much time now (35-40 ms). This is because of conversion to buffer
  Update: msgpack.js returns an ArrayBuffer when encoded. Sending that ArrayBuffer over socket.io didn't
- improve anything. 
+ improve anything.
 
  Time for a sample run (ms):
  -------------------------------------------
@@ -45,7 +45,7 @@ Socket is still taking a lot of time despite sending ArrayBuffer.
 
     if(req.url == '/')
         filePath = __dirname + '/index_buffer.html';
-    
+
     //console.log('Request URL :' + req.url);
     var extName = path.extname(req.url);
     var contentType = 'text/html';
@@ -117,45 +117,46 @@ var parameters;
 var sCloth;
 
 
-server.listen(1235);
+server.listen(1234);
 var io = require('socket.io').listen(server);
 var id = 0;
 io.sockets.on('connection', function(socket){
-    
+
+    // load parameters and initialize cloth
     socket.on('load_parameters', function(data){
         parameters = data.parameters;
-        console.log("Parameters received. Initializing cloth");
+        boundsx = parameters.canvas_width - 1;
+        boundsy = parameters.canvas_height - 1;
+        //console.log("Parameters received. Initializing cloth");
         sCloth = new SerializedCloth();
         cloth = new Cloth();
         encoded = msgpack.encode(sCloth.points);
         socket.emit('newCloth', {image: true, buffer : encoded})
     });
 
+    //update cloth
     socket.on('updateCloth', function(data){
-        d = new Date();        
-        console.log('Received update Event after ' + (new Date().getTime() - data.t) + '@ ' + 
-            d.getHours() + ':'+ d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
-        
-        now = new Date().getTime();
-        id++;        
+        rcvTime = new Date();
+        id++;
         cloth.update();
         past = new Date().getTime();
-        
-        console.log('Time taken for update: ' + (past - now));
-        now = new Date().getTime();
-        
+
         startTime = new Date().getTime();
-        encoded = msgpack.encode(sCloth.points);        
+        toSend = {
+          time : rcvTime.getTime(),
+          cloth : sCloth.points
+        }
+        encoded = msgpack.encode(toSend);
         endTime = new Date().getTime();
-        console.log('Time taken to encode: ' + (endTime-startTime));
-        
-        // d = new Date();        
-        // console.log('Id: ' + id + ', Event emitted at: ' + d.getHours() +':'+
-        //     d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
-        //clothBuffer = new Buffer(sCloth.points);
-        socket.emit('updatedCloth', {image: true, buffer : encoded});
-        console.log('------------------------');
-            
+        //console.log('Time taken to encode: ' + (endTime-startTime));
+        toSend = {
+          time : new Date().getTime(),
+          data : encoded
+        }
+        socket.emit('updatedCloth', {'parameters' : toSend});
+        //socket.emit('updatedCloth', {image: true, buffer : encoded});
+        //console.log('------------------------');
+
         //console.log('Time taken to emit: ' + (new Date().getTime() - d.getTime()));
     });
 
@@ -164,11 +165,6 @@ io.sockets.on('connection', function(socket){
     });
 
 }); // end io.sockets.on
-
-
-var sizeof = function(data){
-
-}
 
 // Point data structure to pass to client
 
@@ -246,15 +242,15 @@ Point.prototype.resolve_constraints = function () {
 
     // Get the number of constraints. Would be maximum 2
     var i = this.constraints.length;
-    while (i--) 
+    while (i--)
         this.constraints[i].resolve();
 
-    // if the point is going outside the boundary, 
+    // if the point is going outside the boundary,
     // give it a position within the boundary.
 
     if (this.x > boundsx) {
         this.x = 2 * boundsx - this.x;
-        
+
     } else if (this.x < 1) {
         this.x = 2 - this.x;
     }
@@ -262,7 +258,7 @@ Point.prototype.resolve_constraints = function () {
     if (this.y > boundsy) {
 
         this.y = 2 * boundsy - this.y;
-        
+
     } else if (this.y < 1) {
 
         this.y = 2 - this.y;
@@ -319,8 +315,8 @@ Constraint.prototype.resolve = function () {
         diff = (this.length - dist) / dist;
 
     // if distance between points is > tear distance, remove the constraint,
-    // i.e detach the points     
-    if (dist > parameters.tear_distance) 
+    // i.e detach the points
+    if (dist > parameters.tear_distance)
         this.p1.remove_constraint(this);
 
     // calculate the amount by which positions are to be changed.
@@ -353,11 +349,11 @@ var Cloth = function () {
 
             // if it is not the first point in the row, attach it with the point just before it
             x != 0 && p.attach(this.points[this.points.length - 1]);
-            
+
             // if it is the first row, pin the point at the coordinate. This is to keep the cloth
             // attached from the top.
             y == 0 && p.pin(p.x, p.y);
-            
+
             // if it is not the first row, attach the point to the point just above it in the matrix
             // |.|.|.|.|.|
             // |.|.|i|.|.|
@@ -379,18 +375,14 @@ Cloth.prototype.update = function () {
     // Resolve the constraints for all the points physics_accuracy number of times
     while (i--) {
         var p = this.points.length;
-        while (p--) 
+        while (p--)
             this.points[p].resolve_constraints();
     }
 
 
     i = this.points.length;
     // update all the points by delta amount. Brings swaying motion to the cloth
-    while (i--) 
+    while (i--)
         this.points[i].update(.016);
-    
-    var p = this.points.length;
-    // while(p--)
-    //     sCloth.update(this.points[p], this.points[p].index);
-};
 
+};

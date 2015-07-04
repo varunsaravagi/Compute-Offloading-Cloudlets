@@ -1,5 +1,5 @@
- /* This file uses BinaryJS library to transmit data. 
- 
+ /* This file uses BinaryJS library to transmit data.
+
  */
 
  var http = require('http');
@@ -8,14 +8,14 @@
  var server = http.createServer(handler);
  var msgpack = require('msgpack-js-browser');
  //var sizeof = require('object-sizeof');
- 
+
 
  function handler(req, res) {
     var filePath = __dirname + '/index_binary.html';
 
     if(req.url == '/')
         filePath = __dirname + '/index_binary.html';
-    
+
     //console.log('Request URL :' + req.url);
     var extName = path.extname(req.url);
     var contentType = 'text/html';
@@ -94,43 +94,52 @@ var bs = new BinaryServer({server : server});
 var id = 0;
 bs.on('connection', function(client){
     client.on('stream', function(stream, meta){
-        console.log('Meta: ' + meta);
         stream.on('data', function(data){
-
+            rcvTime = new Date();
             param = new Uint8Array(data.buffer);
             decoded = msgpack.decode(param.buffer);
             console.log(decoded.id);
+
             if(decoded.id == 'load_parameters'){
-                console.log(data);
+                //console.log(data);
                 parameters = decoded.parameters;
-                console.log("Parameters received. Initializing cloth");
-                
+                //console.log("Parameters received. Initializing cloth");
+                boundsx = parameters.canvas_width - 1;
+                boundsy = parameters.canvas_height - 1;
                 sCloth = new SerializedCloth();
                 cloth = new Cloth();
-                
-                encoded = msgpack.encode(sCloth.points);
-                console.log('Size of cloth: ' + encoded.byteLength);
-                
+
+                toSend = {
+                  time : rcvTime.getTime(),
+                  cloth : sCloth.points
+                }
+
+                encoded = msgpack.encode(toSend);
                 var buffer = new Buffer( new Uint8Array(encoded));
                 stream.write({buffer : buffer});
             }
 
             else if(decoded.id == 'updateCloth'){
-                console.log('Received updateCloth from client after: ' + (new Date().getTime() - decoded.t))
+
+                //console.log('Received updateCloth from client after: ' + (new Date().getTime() - decoded.t))
                 update();
-                
-                startTime = new Date().getTime();        
-                
-                encoded = msgpack.encode(sCloth.points);
-                console.log('Size of cloth: ' + encoded.byteLength);
+
+                startTime = new Date().getTime();
+                toSend = {
+                  time : rcvTime.getTime(),
+                  cloth : sCloth.points
+                }
+                encoded = msgpack.encode(toSend);
+                //console.log('Size of cloth: ' + encoded.byteLength);
+
                 var buffer = new Buffer( new Uint8Array(encoded));
-                
-                endTime = new Date().getTime();
-                console.log('Time taken to encode: ' + (endTime-startTime));      
-                
-                d = new Date();        
-                t =  d.getHours() + ':'+ d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds();
-                console.log('Event streamed at: ' + t);          
+
+                // endTime = new Date().getTime();
+                // console.log('Time taken to encode: ' + (endTime-startTime));
+
+                // d = new Date();
+                // t =  d.getHours() + ':'+ d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds();
+                // console.log('Event streamed at: ' + t);
                 stream.write({buffer : buffer});
             }
             else if(decoded.id == 'mouse'){
@@ -140,20 +149,20 @@ bs.on('connection', function(client){
         });
     });
 });
-    
+
     function update(){
-        
+
         now = new Date().getTime();
-        id++;        
+        id++;
         cloth.update();
         past = new Date().getTime();
-        
+
         console.log('Time taken for update: ' + (past - now));
         now = new Date().getTime();
-        
-        
+
+
         console.log('------------------------');
-            
+
         //console.log('Time taken to emit: ' + (new Date().getTime() - d.getTime()));
     };
 
@@ -238,15 +247,15 @@ Point.prototype.resolve_constraints = function () {
 
     // Get the number of constraints. Would be maximum 2
     var i = this.constraints.length;
-    while (i--) 
+    while (i--)
         this.constraints[i].resolve();
 
-    // if the point is going outside the boundary, 
+    // if the point is going outside the boundary,
     // give it a position within the boundary.
 
     if (this.x > boundsx) {
         this.x = 2 * boundsx - this.x;
-        
+
     } else if (this.x < 1) {
         this.x = 2 - this.x;
     }
@@ -254,7 +263,7 @@ Point.prototype.resolve_constraints = function () {
     if (this.y > boundsy) {
 
         this.y = 2 * boundsy - this.y;
-        
+
     } else if (this.y < 1) {
 
         this.y = 2 - this.y;
@@ -311,8 +320,8 @@ Constraint.prototype.resolve = function () {
         diff = (this.length - dist) / dist;
 
     // if distance between points is > tear distance, remove the constraint,
-    // i.e detach the points     
-    if (dist > parameters.tear_distance) 
+    // i.e detach the points
+    if (dist > parameters.tear_distance)
         this.p1.remove_constraint(this);
 
     // calculate the amount by which positions are to be changed.
@@ -345,11 +354,11 @@ var Cloth = function () {
 
             // if it is not the first point in the row, attach it with the point just before it
             x != 0 && p.attach(this.points[this.points.length - 1]);
-            
+
             // if it is the first row, pin the point at the coordinate. This is to keep the cloth
             // attached from the top.
             y == 0 && p.pin(p.x, p.y);
-            
+
             // if it is not the first row, attach the point to the point just above it in the matrix
             // |.|.|.|.|.|
             // |.|.|i|.|.|
@@ -371,18 +380,17 @@ Cloth.prototype.update = function () {
     // Resolve the constraints for all the points physics_accuracy number of times
     while (i--) {
         var p = this.points.length;
-        while (p--) 
+        while (p--)
             this.points[p].resolve_constraints();
     }
 
 
     i = this.points.length;
     // update all the points by delta amount. Brings swaying motion to the cloth
-    while (i--) 
+    while (i--)
         this.points[i].update(.016);
-    
+
     var p = this.points.length;
     // while(p--)
     //     sCloth.update(this.points[p], this.points[p].index);
 };
-

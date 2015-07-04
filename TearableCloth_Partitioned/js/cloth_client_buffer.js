@@ -1,4 +1,4 @@
-/* This is the client side javascript file of cloth_server_buffer. It gets the points from 
+/* This is the client side javascript file of cloth_server_buffer. It gets the points from
 the server and draws them.
 */
 
@@ -7,7 +7,7 @@ var socket = io.connect();
 
 // global parameters
 var parameters = {
-	physics_accuracy : 3, 
+	physics_accuracy : 3,
     mouse_influence : 20,
     mouse_cut : 5,
     gravity : 1200,
@@ -64,64 +64,38 @@ function load_variables(){
 };
 
 var startTime, endTime;
+
+var fps = new timer();
+var result = new dataPoints();
+
+// Received new cloth from the server
 socket.on('newCloth', function(data){
-   // console.log('Received cloth');
-    received = data.buffer;    
+    received = data.buffer;
     cloth = msgpack.decode(received);
     draw();
-    doEmit = true;
-    emit_update();
+    socket.emit('updateCloth', {});
 });
 
-doEmit = false;
-function emit_update(){
-    if(doEmit){
-       // console.log('-----------------------');
-        socket.emit('updateCloth', {});
-        doEmit = false;
-    }
-}
-
-function update(){
-   // console.log('-----------------------');
-    
-    socket.emit('updateCloth', {});
-    
-};
-
+// Received updated cloth from server
 socket.on('updatedCloth', function(data){
-    d = new Date();
-    //console.log('Event received at: ' + d.getHours() + ':' +
-            //d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
+		received = data.parameters;
+		nlatency = new Date().getTime() - received.time;
 
-    received = data.buffer;
-    // startTime = new Date().getTime();
-    // cloth = msgpack.decode(received);
-    // endTime = new Date().getTime();
-    // console.log('Time taken for decode: ' + (endTime-startTime));
-   
-    // startDraw = new Date().getTime();
-    // draw();
-    // console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    
-    
-    // doEmit = true;
-    
-    d = new Date();
-    //console.log('Event emitted at: ' + d.getHours() + ':' +
-            //d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
-    socket.emit('updateCloth', {t : d.getTime()});
+		//received = data.buffer;
+		var dataSize = received.data.byteLength;
+		bps = (dataSize*8*1000)/nlatency;
+		mbps = bps/(1024*1024).toFixed(2);
 
-    startTime = new Date().getTime();
-    cloth = msgpack.decode(received);
-    endTime = new Date().getTime();
-   // console.log('Time taken for decode: ' + (endTime-startTime));
-   
-    startDraw = new Date().getTime();
+		rcvData = msgpack.decode(received.data);
+		cloth = rcvData.cloth;
+
     draw();
-    //console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    
-    
-    doEmit = true;
-    //console.log('-----------------------');
+		eteLatency = new Date().getTime() - rcvData.time;
+		fps.tick(new Date().getTime());
+
+		d = new Date().getTime();
+		socket.emit('updateCloth', {t : d});
+		result.add(eteLatency, nlatency, fps.fps(), mbps);
 });
 
 // Draw the cloth
@@ -131,7 +105,7 @@ function draw() {
 
     var i = cloth.length;
     // Loop over all the points and draw each point
-    while (i--) 
+    while (i--)
         draw_points(cloth[i]);
 
     ctx.stroke();
@@ -147,9 +121,9 @@ function draw_points(point){
 
     for(var j=0;j<=i;j=j+2){
         ctx.moveTo(point[0], point[1]);
-        ctx.lineTo(point[j+2], point[j+3]);    
+        ctx.lineTo(point[j+2], point[j+3]);
     }
-    
+
 }
 // start the simulation
 function start() {
@@ -164,7 +138,7 @@ function start() {
         mouse.down = true;
         socket.emit('mouse', {mouseData:mouse});
         e.preventDefault();
-        
+
     };
 
     canvas.onmouseup = function (e) {
@@ -192,12 +166,8 @@ function start() {
     boundsy = canvas.height - 1;
 
     ctx.strokeStyle = '#888';
-    
-    load_variables();    
-    // Define the points and constraints in the cloth
-    //cloth = new Cloth();
-    //startTime = new Date().getTime();
-    //update_simulation();
+
+    load_variables();
 }
 
 // call this function when the window loads
@@ -206,8 +176,8 @@ window.onload = function () {
     canvas = document.getElementById('c');
     ctx = canvas.getContext('2d');
 
-    canvas.width = 560;
-    canvas.height = 350;
+    // canvas.width = 560;
+    // canvas.height = 350;
 
     // detect touch event
     canvas.addEventListener("touchstart", function(event){
@@ -220,7 +190,7 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         mouse.down = true;
-        socket.emit('mouse', {mouseData:mouse});  
+        socket.emit('mouse', {mouseData:mouse});
     }, false);
 
     // detect touch movement
@@ -234,12 +204,12 @@ window.onload = function () {
         mouse.y = touch.clientY - rect.top,
         event.preventDefault();
         socket.emit('mouse', {mouseData:mouse});
-        //console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");  
+        //console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");
     }, false);
 
     // detect end of touch
     canvas.addEventListener("touchend", function(event){
-        event.preventDefault();        
+        event.preventDefault();
         mouse.down = false;
         event.preventDefault();
         socket.emit('mouse', {mouseData:mouse});
@@ -247,3 +217,11 @@ window.onload = function () {
 
     start();
 };
+
+window.setInterval(function(){
+	document.getElementById('elatency').value = result.avElatency();
+	document.getElementById('fps').value = result.avFps();
+	document.getElementById('nlatency').value = result.avNlatency();
+	document.getElementById('bandwidth').value = result.avBandwidth();
+	result.reset();
+}, 1000);
