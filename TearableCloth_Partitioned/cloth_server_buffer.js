@@ -1,36 +1,4 @@
  /* This file uses a Buffer to store the points and transmit them over the server.
-
- Result: The update function takes much time now (35-40 ms). This is because of conversion to buffer
- Update: msgpack.js returns an ArrayBuffer when encoded. Sending that ArrayBuffer over socket.io didn't
- improve anything.
-
- Time for a sample run (ms):
- -------------------------------------------
- Server:
-    Received update Event after 6
-    Time taken for update: 9
-    Time taken to encode: 15
-    Id: 67, Event emitted at: 21:44:4:292
-
- Client:
-    Event received at: 21:44:4:366
-    Time taken for decode: 39 -msgpack
-    Time taken to draw 5
-    Event emitted at: 21:44:4:411
----------------------------------------------
- Server:
-    Received update Event after 1
-    Time taken for update: 14
-    Time taken to encode: 10 - msgpack
-    Id: 68, Event emitted at: 21:44:4:437
-
- Client:
-    Event received at: 21:44:4:518
-    Time taken for decode: 36 -msgpack
-    Time taken to draw 6
-    Event emitted at: 21:44:4:561
--------------------------------------------------------------------------------------------
-Socket is still taking a lot of time despite sending ArrayBuffer.
  */
 
  var http = require('http');
@@ -160,6 +128,18 @@ io.sockets.on('connection', function(socket){
 
     socket.on('mouse', function(data){
         mouse = data.mouseData;
+    });
+
+    socket.on('dataPoints', function(data){
+      dataPoints = data.dataPoints;
+      text = '\n\nSocket:\nEnd-to-end Latency: ' + dataPoints.elatency + '\n' +
+        'FPS: ' + dataPoints.fps;
+      name = dataPoints.name + '.txt';
+      fs.appendFile(name, text, function(err){
+        if(err)
+          throw err;
+        console.log('File saved');
+      })
     });
 
 }); // end io.sockets.on

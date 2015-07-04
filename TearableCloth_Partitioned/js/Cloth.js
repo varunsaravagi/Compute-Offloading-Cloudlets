@@ -25,6 +25,7 @@ function getValue(elementId){
     return document.getElementById(elementId).value;
 }
 
+var socket = io.connect();
 // parameters required for simulation
 
 // attempt to get the parameters from the HTML page. Giving error from cloth_width onwards.
@@ -38,7 +39,6 @@ var physics_accuracy,
     start_y,
     spacing,
     tear_distance;
-
 
 function load_variables(){
     physics_accuracy = parseInt(document.getElementById('pa_text').value),//getValue("physics_accuracy"),
@@ -137,9 +137,8 @@ Point.prototype.draw = function () {
 
     var i = this.constraints.length;
     // Draw points for each constraint this point has
-    while (i--) 
-        //this.constraints[i].draw();
-        this.constraints[i].draw(this);
+    while (i--)
+        this.constraints[i].draw();
 };
 
 // Resolve the constraints of the point with the attached points
@@ -155,15 +154,15 @@ Point.prototype.resolve_constraints = function () {
 
     // Get the number of constraints. Would be maximum 2
     var i = this.constraints.length;
-    while (i--) 
-        //this.constraints[i].resolve();
-        this.constraints[i].resolve(this);
-    // if the point is going outside the boundary, 
+    while (i--)
+        this.constraints[i].resolve();
+
+    // if the point is going outside the boundary,
     // give it a position within the boundary.
 
     if (this.x > boundsx) {
         this.x = 2 * boundsx - this.x;
-        
+
     } else if (this.x < 1) {
         this.x = 2 - this.x;
     }
@@ -171,7 +170,7 @@ Point.prototype.resolve_constraints = function () {
     if (this.y > boundsy) {
 
         this.y = 2 * boundsy - this.y;
-        
+
     } else if (this.y < 1) {
 
         this.y = 2 - this.y;
@@ -184,11 +183,8 @@ Point.prototype.resolve_constraints = function () {
 Point.prototype.attach = function (point) {
 
     this.constraints.push(
-        new Constraint(point)
+        new Constraint(this, point)
     );
-    // this.constraints.push(
-    //     new Constraint(this, point)
-    // );
 };
 
 // remove the given link from the point
@@ -213,54 +209,43 @@ Point.prototype.pin = function (pinx, piny) {
     this.pin_y = piny;
 };
 
-var Constraint = function (p2) {
+var Constraint = function (p1, p2) {
 
-    //this.p1 = p1;
+    this.p1 = p1;
     this.p2 = p2;
     this.length = spacing;
 };
 
 // Resolve the constraint
-Constraint.prototype.resolve = function (point) {
+Constraint.prototype.resolve = function () {
 
     // Get the new distance between the two points in the constraint
-    var diff_x = point.x - this.p2.x,
-        diff_y = point.y - this.p2.y,
+    var diff_x = this.p1.x - this.p2.x,
+        diff_y = this.p1.y - this.p2.y,
         dist = Math.sqrt(diff_x * diff_x + diff_y * diff_y),
         //Get the difference from the length. No idea why this formula was used
         diff = (this.length - dist) / dist;
 
-    // var diff_x = this.p1.x - this.p2.x,
-    //     diff_y = this.p1.y - this.p2.y,
-    //     dist = Math.sqrt(diff_x * diff_x + diff_y * diff_y),
-    //     //Get the difference from the length. No idea why this formula was used
-    //     diff = (this.length - dist) / dist;
-
     // if distance between points is > tear distance, remove the constraint,
-    // i.e detach the points     
-    //TEMPORARY COMMENT
-    if (dist > tear_distance) 
-        point.remove_constraint(this);
+    // i.e detach the points
+    if (dist > tear_distance) this.p1.remove_constraint(this);
 
     // calculate the amount by which positions are to be changed.
     var px = diff_x * diff * 0.5;
     var py = diff_y * diff * 0.5;
 
     // add the difference to first point
-    point.x += px;
-    point.y += py;
+    this.p1.x += px;
+    this.p1.y += py;
     // subtract the difference from second point
     this.p2.x -= px;
     this.p2.y -= py;
 };
 
-Constraint.prototype.draw = function (point) {
+Constraint.prototype.draw = function () {
 
-    ctx.moveTo(point.x, point.y);
-    ctx.lineTo(point.x, this.p2.y);
-
-    // ctx.moveTo(this.p1.x, this.p1.y);
-    // ctx.lineTo(this.p2.x, this.p2.y);
+    ctx.moveTo(this.p1.x, this.p1.y);
+    ctx.lineTo(this.p2.x, this.p2.y);
 };
 
 var Cloth = function () {
@@ -284,7 +269,7 @@ var Cloth = function () {
             // if it is the first row, pin the point at the coordinate. This is to keep the cloth
             // attached from the top.
             y == 0 && p.pin(p.x, p.y);
-            
+
             // if it is not the first row, attach the point to the point just above it in the matrix
             // |.|.|.|.|.|
             // |.|.|i|.|.|
@@ -305,14 +290,14 @@ Cloth.prototype.update = function () {
     // Resolve the constraints for all the points physics_accuracy number of times
     while (i--) {
         var p = this.points.length;
-        while (p--) 
+        while (p--)
             this.points[p].resolve_constraints();
     }
 
 
     i = this.points.length;
     // update all the points by delta amount. Brings swaying motion to the cloth
-    while (i--) 
+    while (i--)
         this.points[i].update(.016);
 };
 
@@ -323,37 +308,30 @@ Cloth.prototype.draw = function () {
 
     var i = cloth.points.length;
     // Loop over all the points and draw each point
-    while (i--) 
+    while (i--)
         cloth.points[i].draw();
 
     ctx.stroke();
 };
 
-var t = new timer();
-var startTime = 0;
+var fps = new timer();
+var result = new dataPoints();
 
 function update() {
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    startTime = new Date().getTime();
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     cloth.update();
     cloth.draw();
-    var end = new Date().getTime();
-    //console.log("Update finished: Time taken " + (end-start));
-    requestAnimFrame(update);
-    t.tick(new Date().getTime());
-    if(end-startTime > 1000){
-        startTime = new Date().getTime();
-        document.getElementById('fps').innerHTML = "FPS: " + t.fps();
-        document.getElementById('fpsAv').innerHTML = "Average FPS: " + t.fpsAv();
-        //t = new timer();
-    }
+    fps.tick(new Date().getTime());
+    eteLatency = new Date().getTime() - startTime;
+    result.add(eteLatency,fps.fps());
 
-    
+    requestAnimFrame(update);
 }
 
 function start() {
-    t = new timer();
+
     canvas.onmousedown = function (e) {
         mouse.button = e.which;
         mouse.px = mouse.x;
@@ -388,11 +366,10 @@ function start() {
     boundsy = canvas.height - 1;
 
     ctx.strokeStyle = '#888';
-    
-    load_variables();    
+
+    load_variables();
     // Define the points and constraints in the cloth
     cloth = new Cloth();
-    startTime = new Date().getTime();
     update();
 }
 
@@ -414,7 +391,7 @@ window.onload = function () {
         var rect = canvas.getBoundingClientRect();
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
-        mouse.down = true;  
+        mouse.down = true;
     }, false);
 
     canvas.addEventListener("touchmove", function(event){
@@ -426,14 +403,34 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         event.preventDefault();
-        console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");  
+        console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");
     }, false);
 
     canvas.addEventListener("touchend", function(event){
-        event.preventDefault();        
+        event.preventDefault();
         mouse.down = false;
         event.preventDefault();
     }, false);
 
     start();
 };
+
+function send(){
+	elatency = result.getSElatency();
+	lfps = result.getSFps();
+	fileName = 'P'+physics_accuracy+'_H'+cloth_height+'_W'+cloth_width;
+	toSend = {
+		name : fileName,
+		elatency : elatency,
+		fps : lfps
+	};
+	socket.emit('dataPoints', {dataPoints : toSend});
+}
+
+window.setInterval(function(){
+	document.getElementById('elatency').value = result.avElatency();
+	document.getElementById('fps').value = result.avFps();
+	//document.getElementById('nlatency').value = result.avNlatency();
+	//document.getElementById('bandwidth').value = result.avBandwidth();
+	result.reset();
+}, 1000);

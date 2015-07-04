@@ -16,8 +16,8 @@ dataPoints.prototype = {
     //this.nlatency += nlatency;
     //this.bandwidth += bandwidth;
     this.fps += fps;
-    this.elatencyStore.push(elatency);
-    this.fpsStore.push(fps);
+    //this.elatencyStore.push(elatency);
+    //this.fpsStore.push(fps);
     this.counter += 1;
   },
 
@@ -67,5 +67,9 @@ dataPoints.prototype = {
 
   getSBandwidth : function(){
     return this.bandwidthStore;
+  },
+
+  getCounter : function(){
+    return this.counter;
   }
 }

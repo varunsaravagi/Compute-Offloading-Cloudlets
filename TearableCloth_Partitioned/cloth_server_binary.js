@@ -39,11 +39,11 @@
         //console.log("not favicon")
         fs.readFile(filePath, function(err, data) {
             if (err) {
-                console.log(err);
+              //  console.log(err);
                 res.writeHead(500);
                 return res.end('Error loading index.html');
             }
-            console.log('Connection successful');
+          //  console.log('Connection successful');
             res.writeHead(200, {'Content-Type': contentType});
             res.end(data, 'utf-8');
         });
@@ -98,7 +98,7 @@ bs.on('connection', function(client){
             rcvTime = new Date();
             param = new Uint8Array(data.buffer);
             decoded = msgpack.decode(param.buffer);
-            console.log(decoded.id);
+            //console.log(decoded.id);
 
             if(decoded.id == 'load_parameters'){
                 //console.log(data);
@@ -145,7 +145,16 @@ bs.on('connection', function(client){
             else if(decoded.id == 'mouse'){
                 mouse = decoded.mouse;
             }
-
+            else if(decoded.id == 'dataPoints'){
+              text = '\n\nBinary:\nEnd-to-end Latency: ' + decoded.elatency + '\n' +
+                'FPS: ' + decoded.fps;
+              name = decoded.name + '.txt';
+              fs.appendFile(name, text, function(err){
+                if(err)
+                  throw err;
+              //  console.log('File saved');
+              });
+            }
         });
     });
 });
@@ -157,11 +166,11 @@ bs.on('connection', function(client){
         cloth.update();
         past = new Date().getTime();
 
-        console.log('Time taken for update: ' + (past - now));
+        //console.log('Time taken for update: ' + (past - now));
         now = new Date().getTime();
 
 
-        console.log('------------------------');
+        //console.log('------------------------');
 
         //console.log('Time taken to emit: ' + (new Date().getTime() - d.getTime()));
     };

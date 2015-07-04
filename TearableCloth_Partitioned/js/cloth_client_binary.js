@@ -3,7 +3,7 @@ the server and draws them.
 */
 
 
-var client   = new BinaryClient('ws://localhost:1234');
+var client   = new BinaryClient('ws://localhost:1235');
 // global parameters
 var parameters = {
 	physics_accuracy : 3,
@@ -67,6 +67,7 @@ function load_variables(){
 var fps = new timer();
 var result = new dataPoints();
 var past;
+var stream;
 function start_sim(){
     var param = {
         id : 'load_parameters',
@@ -85,9 +86,9 @@ function start_sim(){
 				eteLatency = past ? (new Date().getTime() - past)/2 : 0;
 				//eteLatency = new Date().getTime() - rcvData.time;
 				fps.tick(new Date().getTime());
-
-				document.getElementById('elatency').value = eteLatency;//result.avElatency();
-				document.getElementById('fps').value = fps.fps();//result.avFps();
+				past = new Date().getTime();
+				//document.getElementById('elatency').value = eteLatency;//result.avElatency();
+				//document.getElementById('fps').value = fps.fps();//result.avFps();
 				result.add(eteLatency,fps.fps());
 
 				emit_update(stream);
@@ -103,6 +104,20 @@ function emit_update(stream){
     stream.write({buffer : encoded});
 }
 
+function send(){
+	elatency = result.getSElatency();
+	lfps = result.getSFps();
+	fileName = 'P'+parameters.physics_accuracy+'_H'+parameters.cloth_height+'_W'+parameters.cloth_width;
+	param = {
+		id : 'dataPoints',
+		name : fileName,
+		elatency : elatency,
+		fps : lfps
+	};
+	encoded = msgpack.encode(param);
+	stream.write({buffer : encoded});
+
+}
 
 // Draw the cloth
 function draw() {
@@ -234,10 +249,10 @@ window.onload = function () {
     start();
 };
 
-// window.setInterval(function(){
-// 	document.getElementById('elatency').value = result.avElatency();
-// 	document.getElementById('fps').value = result.avFps();
-// 	document.getElementById('nlatency').value = result.avNlatency();
-// 	document.getElementById('bandwidth').value = result.avBandwidth();
-// 	result.reset();
-// }, 1000);
+window.setInterval(function(){
+	document.getElementById('elatency').value = result.avElatency();
+	document.getElementById('fps').value = result.avFps();
+	//document.getElementById('nlatency').value = result.avNlatency();
+	//document.getElementById('bandwidth').value = result.avBandwidth();
+	result.reset();
+}, 1000);

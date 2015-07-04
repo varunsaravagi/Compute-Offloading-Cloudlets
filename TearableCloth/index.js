@@ -47,3 +47,17 @@
 
   server.listen(1236);
  	var io = require('socket.io').listen(server);
+
+  io.sockets.on('connection', function(socket){
+    socket.on('dataPoints', function(data){
+      dataPoints = data.dataPoints;
+      text = 'End-to-end Latency: ' + dataPoints.elatency + '\n' +
+        'FPS: ' + dataPoints.fps;
+      name = dataPoints.name + '.txt';
+      fs.appendFile(name, text, function(err){
+        if(err)
+          throw err;
+        console.log('File saved');
+      })
+    });
+  })

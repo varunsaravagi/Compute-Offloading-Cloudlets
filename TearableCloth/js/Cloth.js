@@ -25,6 +25,7 @@ function getValue(elementId){
     return document.getElementById(elementId).value;
 }
 
+var socket = io.connect();
 // parameters required for simulation
 
 // attempt to get the parameters from the HTML page. Giving error from cloth_width onwards.
@@ -414,10 +415,22 @@ window.onload = function () {
     start();
 };
 
+function send(){
+	elatency = result.getSElatency();
+	fps = result.getSFps();
+	fileName = 'mobile_'+physics_accuracy+'_'+cloth_height+'_'+cloth_width;
+	toSend = {
+		name : fileName,
+		elatency : elatency,
+		fps : fps
+	};
+	socket.emit('dataPoints', {dataPoints : toSend});
+}
+
 window.setInterval(function(){
 	document.getElementById('elatency').value = result.avElatency();
 	document.getElementById('fps').value = result.avFps();
-	document.getElementById('nlatency').value = result.avNlatency();
-	document.getElementById('bandwidth').value = result.avBandwidth();
+	//document.getElementById('nlatency').value = result.avNlatency();
+	//document.getElementById('bandwidth').value = result.avBandwidth();
 	result.reset();
 }, 1000);

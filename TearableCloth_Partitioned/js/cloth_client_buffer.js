@@ -7,7 +7,7 @@ var socket = io.connect();
 
 // global parameters
 var parameters = {
-	physics_accuracy : 3,
+	  physics_accuracy : 3,
     mouse_influence : 20,
     mouse_cut : 5,
     gravity : 1200,
@@ -102,8 +102,8 @@ socket.on('updatedCloth', function(data){
 		past = new Date().getTime();
 		socket.emit('updateCloth', {t : past});
 
-		document.getElementById('elatency').value = eteLatency;//result.avElatency();
-		document.getElementById('fps').value = fps.fps();//result.avFps();
+		//document.getElementById('elatency').value = eteLatency;//result.avElatency();
+		//document.getElementById('fps').value = fps.fps();//result.avFps();
 		//document.getElementById('nlatency').value = nlatency;//result.avNlatency();
 		//document.getElementById('bandwidth').value = mbps;//result.avBandwidth();
 		result.add(eteLatency,fps.fps());
@@ -229,10 +229,21 @@ window.onload = function () {
     start();
 };
 
-//  window.setInterval(function(){
-//  	document.getElementById('elatency').value = result.avElatency();
-//  	document.getElementById('fps').value = result.avFps();
-//  	//document.getElementById('nlatency').value = result.avNlatency();
-//  	//document.getElementById('bandwidth').value = result.avBandwidth();
-//  	result.reset();
-//  }, 1000);
+function send(){
+	elatency = result.getSElatency();
+	lfps = result.getSFps();
+	fileName = 'P'+parameters.physics_accuracy+'_H'+parameters.cloth_height+'_W'+parameters.cloth_width;
+	toSend = {
+		name : fileName,
+		elatency : elatency,
+		fps : lfps
+	};
+	socket.emit('dataPoints', {dataPoints : toSend});
+}
+ window.setInterval(function(){
+ 	document.getElementById('elatency').value = result.avElatency();
+ 	document.getElementById('fps').value = result.avFps();
+ 	//document.getElementById('nlatency').value = result.avNlatency();
+ 	//document.getElementById('bandwidth').value = result.avBandwidth();
+ 	result.reset();
+ }, 1000);

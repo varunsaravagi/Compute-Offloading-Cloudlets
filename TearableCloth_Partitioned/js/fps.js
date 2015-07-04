@@ -12,7 +12,7 @@ timer.prototype = {
 	},
 
 	fps: function(){
-		return (1/this.elapsed).toFixed(2);
+		return Math.round(1/this.elapsed);
 	},
 
 	fpsAv: function(){
