@@ -45,6 +45,10 @@ var canvas,
         py: 0
     };
 
+
+var fps = new timer();
+var result = new dataPoints();
+
 // Load the parameters required for simulation
 function load_variables(){
     parameters.physics_accuracy = parseInt(document.getElementById('pa_text').value),//getValue("physics_accuracy"),
@@ -60,13 +64,11 @@ function load_variables(){
     canvas.height = parseInt(document.getElementById('cah_text').value);
     parameters.canvas_width = canvas.width;
     parameters.canvas_height = canvas.height;
+		result.reset();
     socket.emit('load_parameters', {'parameters' : parameters});
 };
 
 var startTime, endTime;
-
-var fps = new timer();
-var result = new dataPoints();
 
 // Received new cloth from the server
 socket.on('newCloth', function(data){
@@ -76,26 +78,35 @@ socket.on('newCloth', function(data){
     socket.emit('updateCloth', {});
 });
 
+var past, curr;
 // Received updated cloth from server
 socket.on('updatedCloth', function(data){
-		received = data.parameters;
-		nlatency = new Date().getTime() - received.time;
 
+		received = data.parameters;
+		//nlatency = new Date().getTime() - received.time;
+		//console.log('Curr: ' + curr + ', Received: ' + received.time);
 		//received = data.buffer;
-		var dataSize = received.data.byteLength;
-		bps = (dataSize*8*1000)/nlatency;
-		mbps = bps/(1024*1024).toFixed(2);
+		// var dataSize = received.data.byteLength;
+		// bps = (dataSize*8*1000)/nlatency;
+		// mbps = bps/(1024*1024).toFixed(2);
 
 		rcvData = msgpack.decode(received.data);
 		cloth = rcvData.cloth;
 
     draw();
-		eteLatency = new Date().getTime() - rcvData.time;
+		//eteLatency = new Date().getTime() - rcvData.time;
+		eteLatency = past ? (new Date().getTime() - past)/2 : 0;
+		//console.log('Curr: ' + curr + ', Received data: ' + received.time);
 		fps.tick(new Date().getTime());
 
-		d = new Date().getTime();
-		socket.emit('updateCloth', {t : d});
-		result.add(eteLatency, nlatency, fps.fps(), mbps);
+		past = new Date().getTime();
+		socket.emit('updateCloth', {t : past});
+
+		document.getElementById('elatency').value = eteLatency;//result.avElatency();
+		document.getElementById('fps').value = fps.fps();//result.avFps();
+		//document.getElementById('nlatency').value = nlatency;//result.avNlatency();
+		//document.getElementById('bandwidth').value = mbps;//result.avBandwidth();
+		result.add(eteLatency,fps.fps());
 });
 
 // Draw the cloth
@@ -218,10 +229,10 @@ window.onload = function () {
     start();
 };
 
-window.setInterval(function(){
-	document.getElementById('elatency').value = result.avElatency();
-	document.getElementById('fps').value = result.avFps();
-	document.getElementById('nlatency').value = result.avNlatency();
-	document.getElementById('bandwidth').value = result.avBandwidth();
-	result.reset();
-}, 1000);
+//  window.setInterval(function(){
+//  	document.getElementById('elatency').value = result.avElatency();
+//  	document.getElementById('fps').value = result.avFps();
+//  	//document.getElementById('nlatency').value = result.avNlatency();
+//  	//document.getElementById('bandwidth').value = result.avBandwidth();
+//  	result.reset();
+//  }, 1000);

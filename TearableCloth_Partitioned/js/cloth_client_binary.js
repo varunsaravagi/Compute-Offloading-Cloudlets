@@ -66,7 +66,7 @@ function load_variables(){
 
 var fps = new timer();
 var result = new dataPoints();
-
+var past;
 function start_sim(){
     var param = {
         id : 'load_parameters',
@@ -82,11 +82,13 @@ function start_sim(){
 
 				cloth = rcvData.cloth;
         draw();
-
-				eteLatency = new Date().getTime() - rcvData.time;
+				eteLatency = past ? (new Date().getTime() - past)/2 : 0;
+				//eteLatency = new Date().getTime() - rcvData.time;
 				fps.tick(new Date().getTime());
 
-				result.add(eteLatency, 0, fps.fps(), 0);
+				document.getElementById('elatency').value = eteLatency;//result.avElatency();
+				document.getElementById('fps').value = fps.fps();//result.avFps();
+				result.add(eteLatency,fps.fps());
 
 				emit_update(stream);
     });
@@ -232,10 +234,10 @@ window.onload = function () {
     start();
 };
 
-window.setInterval(function(){
-	document.getElementById('elatency').value = result.avElatency();
-	document.getElementById('fps').value = result.avFps();
-	document.getElementById('nlatency').value = result.avNlatency();
-	document.getElementById('bandwidth').value = result.avBandwidth();
-	result.reset();
-}, 1000);
+// window.setInterval(function(){
+// 	document.getElementById('elatency').value = result.avElatency();
+// 	document.getElementById('fps').value = result.avFps();
+// 	document.getElementById('nlatency').value = result.avNlatency();
+// 	document.getElementById('bandwidth').value = result.avBandwidth();
+// 	result.reset();
+// }, 1000);

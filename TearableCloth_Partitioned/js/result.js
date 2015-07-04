@@ -11,11 +11,13 @@ function dataPoints(){
 }
 
 dataPoints.prototype = {
-  add : function(elatency, nlatency, fps, bandwidth){
+  add : function(elatency, fps){
     this.elatency += elatency;
-    this.nlatency += nlatency;
-    this.bandwidth += bandwidth;
+    //this.nlatency += nlatency;
+    //this.bandwidth += bandwidth;
     this.fps += fps;
+    this.elatencyStore.push(elatency);
+    this.fpsStore.push(fps);
     this.counter += 1;
   },
 

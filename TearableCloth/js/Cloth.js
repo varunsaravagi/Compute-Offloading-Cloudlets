@@ -324,7 +324,7 @@ function update() {
     cloth.draw();
     fps.tick(new Date().getTime());
     eteLatency = new Date().getTime() - startTime;
-    result.add(eteLatency, 0, fps.fps(), 0);
+    result.add(eteLatency,fps.fps());
 
     requestAnimFrame(update);
 }

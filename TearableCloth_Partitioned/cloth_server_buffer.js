@@ -139,9 +139,7 @@ io.sockets.on('connection', function(socket){
         rcvTime = new Date();
         id++;
         cloth.update();
-        past = new Date().getTime();
 
-        startTime = new Date().getTime();
         toSend = {
           time : rcvTime.getTime(),
           cloth : sCloth.points
