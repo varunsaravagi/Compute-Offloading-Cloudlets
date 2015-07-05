@@ -54,7 +54,7 @@
       text = '\n\nMobile:\nEnd-to-end Latency: ' + dataPoints.elatency + '\n' +
         'FPS: ' + dataPoints.fps;
       name = dataPoints.name + '.txt';
-      fs.writeFile(name, text, function(err){
+      fs.AppendFile(name, text, function(err){
         if(err)
           throw err;
         console.log('File saved');
