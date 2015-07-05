@@ -100,13 +100,14 @@ socket.on('updatedCloth', function(data){
 		fps.tick(new Date().getTime());
 
 		past = new Date().getTime();
+        document.getElementById('elatency').value = eteLatency;//result.avElatency();
+        document.getElementById('fps').value = fps.fps();//result.avFps();
+        //document.getElementById('nlatency').value = nlatency;//result.avNlatency();
+        //document.getElementById('bandwidth').value = mbps;//result.avBandwidth();
+        result.add(eteLatency,fps.fps());
 		socket.emit('updateCloth', {t : past});
 
-		//document.getElementById('elatency').value = eteLatency;//result.avElatency();
-		//document.getElementById('fps').value = fps.fps();//result.avFps();
-		//document.getElementById('nlatency').value = nlatency;//result.avNlatency();
-		//document.getElementById('bandwidth').value = mbps;//result.avBandwidth();
-		result.add(eteLatency,fps.fps());
+
 });
 
 // Draw the cloth
@@ -240,10 +241,11 @@ function send(){
 	};
 	socket.emit('dataPoints', {dataPoints : toSend});
 }
- window.setInterval(function(){
- 	document.getElementById('elatency').value = result.avElatency();
- 	document.getElementById('fps').value = result.avFps();
- 	//document.getElementById('nlatency').value = result.avNlatency();
- 	//document.getElementById('bandwidth').value = result.avBandwidth();
- 	result.reset();
- }, 1000);
+
+ // window.setTimeout(function(){
+ // 	document.getElementById('elatency').value = result.avElatency();
+ // 	document.getElementById('fps').value = result.avFps();
+ // 	//document.getElementById('nlatency').value = result.avNlatency();
+ // 	//document.getElementById('bandwidth').value = result.avBandwidth();
+ // 	result.reset();
+ // }, 1000);

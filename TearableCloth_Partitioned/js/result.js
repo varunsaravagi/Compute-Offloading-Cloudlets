@@ -1,7 +1,7 @@
 function dataPoints(){
   this.elatency = 0;
   this.nlatency = 0;
-  this.fps = 0;
+  this.fps = 0.0;
   this.bandwidth = 0;
   this.counter = 1;
   this.elatencyStore = [];
@@ -16,13 +16,13 @@ dataPoints.prototype = {
     //this.nlatency += nlatency;
     //this.bandwidth += bandwidth;
     this.fps += fps;
-    //this.elatencyStore.push(elatency);
-    //this.fpsStore.push(fps);
+    this.elatencyStore.push(elatency);
+    this.fpsStore.push(fps);
     this.counter += 1;
   },
 
   avElatency : function(){
-    r = Math.round(this.elatency/this.counter);
+    r = (this.elatency/this.counter).toFixed(2);
     this.elatencyStore.push(r);
     return r;
   },
@@ -34,7 +34,7 @@ dataPoints.prototype = {
   },
 
   avFps : function(){
-    r = Math.round(this.fps/this.counter);
+    r = (this.fps/this.counter).toFixed(2);
     this.fpsStore.push(r);
     return r;
   },
@@ -51,6 +51,10 @@ dataPoints.prototype = {
     this.fps = 0;
     this.bandwidth = 0;
     this.counter = 1;
+    this.elatencyStore = [];
+    this.nlatencyStore = [];
+    this.fpsStore = [];
+    this.bandwidthStore = [];
   },
 
   getSElatency : function(){

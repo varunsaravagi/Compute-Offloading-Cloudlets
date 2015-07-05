@@ -85,7 +85,7 @@ var canvas,
 
 var parameters;
 var sCloth;
-
+var displayed = false;
 
 server.listen(1235);
 var BinaryServer = require('binaryjs').BinaryServer;
@@ -113,7 +113,7 @@ bs.on('connection', function(client){
                   time : rcvTime.getTime(),
                   cloth : sCloth.points
                 }
-
+                displayed = false;
                 encoded = msgpack.encode(toSend);
                 var buffer = new Buffer( new Uint8Array(encoded));
                 stream.write({buffer : buffer});
@@ -130,7 +130,11 @@ bs.on('connection', function(client){
                   cloth : sCloth.points
                 }
                 encoded = msgpack.encode(toSend);
-                //console.log('Size of cloth: ' + encoded.byteLength);
+                if(!displayed){
+                    console.log('Size of cloth: ' + encoded.byteLength);
+                    displayed = true;    
+                }
+                
 
                 var buffer = new Buffer( new Uint8Array(encoded));
 
@@ -152,7 +156,7 @@ bs.on('connection', function(client){
               fs.appendFile(name, text, function(err){
                 if(err)
                   throw err;
-              //  console.log('File saved');
+                console.log('File saved');
               });
             }
         });

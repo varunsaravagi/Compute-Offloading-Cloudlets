@@ -52,7 +52,7 @@ function load_variables(){
     tear_distance = parseInt(document.getElementById('td_text').value);//60;
     canvas.width = parseInt(document.getElementById('caw_text').value);
     canvas.height = parseInt(document.getElementById('cah_text').value);
-
+    result.reset();
 };
 
 window.requestAnimFrame =
@@ -325,6 +325,8 @@ function update() {
     cloth.draw();
     fps.tick(new Date().getTime());
     eteLatency = new Date().getTime() - startTime;
+    document.getElementById('elatency').value = eteLatency;//result.avElatency();
+    document.getElementById('fps').value = fps.fps();//result.avFps();
     result.add(eteLatency,fps.fps());
 
     requestAnimFrame(update);
@@ -427,10 +429,10 @@ function send(){
 	socket.emit('dataPoints', {dataPoints : toSend});
 }
 
-window.setInterval(function(){
-	document.getElementById('elatency').value = result.avElatency();
-	document.getElementById('fps').value = result.avFps();
-	//document.getElementById('nlatency').value = result.avNlatency();
-	//document.getElementById('bandwidth').value = result.avBandwidth();
-	result.reset();
-}, 1000);
+// window.setInterval(function(){
+// 	document.getElementById('elatency').value = result.avElatency();
+// 	document.getElementById('fps').value = result.avFps();
+// 	//document.getElementById('nlatency').value = result.avNlatency();
+// 	//document.getElementById('bandwidth').value = result.avBandwidth();
+// 	result.reset();
+// }, 1000);

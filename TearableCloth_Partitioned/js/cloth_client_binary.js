@@ -3,7 +3,7 @@ the server and draws them.
 */
 
 
-var client   = new BinaryClient('ws://localhost:1235');
+var client   = new BinaryClient('ws://192.168.1.90:1235');
 // global parameters
 var parameters = {
 	physics_accuracy : 3,
@@ -60,7 +60,7 @@ function load_variables(){
     canvas.height = parseInt(document.getElementById('cah_text').value);
     parameters.canvas_width = canvas.width;
     parameters.canvas_height = canvas.height;
-
+    result.reset();
 };
 
 
@@ -87,8 +87,8 @@ function start_sim(){
 				//eteLatency = new Date().getTime() - rcvData.time;
 				fps.tick(new Date().getTime());
 				past = new Date().getTime();
-				//document.getElementById('elatency').value = eteLatency;//result.avElatency();
-				//document.getElementById('fps').value = fps.fps();//result.avFps();
+				document.getElementById('elatency').value = eteLatency;//result.avElatency();
+				document.getElementById('fps').value = fps.fps();//result.avFps();
 				result.add(eteLatency,fps.fps());
 
 				emit_update(stream);
@@ -221,7 +221,7 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         mouse.down = true;
-        client.send(mouse, 'mouse');
+        send_mouse();
     }, false);
 
     // detect touch movement
@@ -234,7 +234,7 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         event.preventDefault();
-        client.send(mouse, 'mouse');
+        send_mouse();
         //console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");
     }, false);
 
@@ -243,16 +243,16 @@ window.onload = function () {
         event.preventDefault();
         mouse.down = false;
         event.preventDefault();
-        client.send(mouse, 'mouse');
+        send_mouse();
     }, false);
 
     start();
 };
 
-window.setInterval(function(){
-	document.getElementById('elatency').value = result.avElatency();
-	document.getElementById('fps').value = result.avFps();
-	//document.getElementById('nlatency').value = result.avNlatency();
-	//document.getElementById('bandwidth').value = result.avBandwidth();
-	result.reset();
-}, 1000);
+// window.setInterval(function(){
+// 	document.getElementById('elatency').value = result.avElatency();
+// 	document.getElementById('fps').value = result.avFps();
+// 	//document.getElementById('nlatency').value = result.avNlatency();
+// 	//document.getElementById('bandwidth').value = result.avBandwidth();
+// 	result.reset();
+// }, 1000);

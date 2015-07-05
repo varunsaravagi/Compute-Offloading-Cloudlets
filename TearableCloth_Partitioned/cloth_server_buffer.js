@@ -83,7 +83,7 @@ var canvas,
 
 var parameters;
 var sCloth;
-
+var displayed = false;
 
 server.listen(1234);
 var io = require('socket.io').listen(server);
@@ -98,6 +98,7 @@ io.sockets.on('connection', function(socket){
         //console.log("Parameters received. Initializing cloth");
         sCloth = new SerializedCloth();
         cloth = new Cloth();
+        displayed = false;
         encoded = msgpack.encode(sCloth.points);
         socket.emit('newCloth', {image: true, buffer : encoded})
     });
@@ -114,6 +115,10 @@ io.sockets.on('connection', function(socket){
         }
         encoded = msgpack.encode(toSend);
         endTime = new Date().getTime();
+        if(!displayed){
+            console.log('Size of Data: ' + encoded.byteLength);
+            displayed = true;
+        }
         //console.log('Time taken to encode: ' + (endTime-startTime));
         toSend = {
           time : new Date().getTime(),
