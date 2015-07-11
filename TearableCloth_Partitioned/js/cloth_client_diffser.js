@@ -3,12 +3,11 @@ the server and draws them.
 */
 
 // get the socket connection
-var socket = io.connect("http://localhost:2000");
-console.log(socket.socket.connected);
+var socket = io.connect({'reconnection':false});
 
 // global parameters
 var parameters = {
-	  physics_accuracy : 3,
+	physics_accuracy : 3,
     mouse_influence : 20,
     mouse_cut : 5,
     gravity : 1200,
@@ -20,17 +19,6 @@ var parameters = {
     canvas_width : 0,
     canvas_height : 0
 };
-
-window.requestAnimFrame =
-    window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.oRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
-    function (callback) {
-        window.setTimeout(callback, 1000 / 60);
-};
-
 
 var canvas,
     ctx,
@@ -65,15 +53,14 @@ function load_variables(){
     canvas.height = parseInt(document.getElementById('cah_text').value);
     parameters.canvas_width = canvas.width;
     parameters.canvas_height = canvas.height;
-		result.reset();
-		window.clearInterval(average);
-		average = window.setInterval(getAverage, 6000);
-		// send the parameters to the server
-		console.log('Emitting load parameters');
-    socket.emit('load_parameters', {'parameters' : parameters});
+	result.reset();
+	window.clearInterval(average);
+	average = window.setInterval(getAverage, 6000);
+	// send the parameters to the server
+	socket.emit('load_parameters', {'parameters' : parameters});
 };
 
-
+socket.on('connect', function(){
 // Received new cloth from the server
 socket.on('newCloth', function(data){
     cloth = msgpack.decode(data.buffer);
@@ -82,27 +69,25 @@ socket.on('newCloth', function(data){
 });
 
 var past,
-		curr;
+    curr;
 
 // Received updated cloth from server
-socket.on('updatedCloth', function(data){
-
-		cloth = msgpack.decode(data.buffer);
-
+socket.on('updatedCloth', function(data){;
+    cloth = msgpack.decode(data.buffer);
     draw();
-		//eteLatency = new Date().getTime() - rcvData.time;
-		eteLatency = past ? (new Date().getTime() - past) : 0;
-		//console.log('Curr: ' + curr + ', Received data: ' + received.time);
-		fps.tick(new Date().getTime());
-		lfps = fps.fps();
-		past = new Date().getTime();
-  	document.getElementById('elatency').value = eteLatency;//result.avElatency();
-		document.getElementById('fps').value = lfps;//result.avFps();
-        //document.getElementById('nlatency').value = nlatency;//result.avNlatency();
-        //document.getElementById('bandwidth').value = mbps;//result.avBandwidth();
+    //eteLatency = new Date().getTime() - rcvData.time;
+    eteLatency = past ? (new Date().getTime() - past) : 0;
+    //console.log('Curr: ' + curr + ', Received data: ' + received.time);
+    fps.tick(new Date().getTime());
+    lfps = fps.fps();
+    document.getElementById('elatency').value = eteLatency;//result.avElatency();
+    document.getElementById('fps').value = lfps;//result.avFps();
     result.add(eteLatency,lfps);
-		socket.emit('updateCloth', {t : past});
+    socket.emit('updateCloth', {t : past});
+    past = new Date().getTime();
 });
+
+})
 
 // Draw the cloth
 function draw() {
@@ -118,35 +103,35 @@ function draw() {
 };
 
 function draw_points(point, index){
-		// point[0] has x coordinate
-		// point[1] has y coordinate
-		// point[2] has constraint type
-		var x = point[0],
-			  y = point[1];
+	// point[0] has x coordinate
+	// point[1] has y coordinate
+	// point[2] has constraint type
+	var x = point[0],
+			y = point[1];
 
-		// get the constraints available with the point
-		constraintType = determine_constraint(point[2]);
-		leftConstraint = constraintType[0];
-		topConstraint = constraintType[1];
+	// get the constraints available with the point
+	constraintType = determine_constraint(point[2]);
+	leftConstraint = constraintType[0];
+	topConstraint = constraintType[1];
 
-		// Get the indices of the top and the left points
-		topIndex = index - (parameters.cloth_width + 1);
-		// left most points do not have a left index.
-		// These are the points which are divisible by the x range
-		leftIndex = index % (parameters.cloth_width + 1) == 0 ?
+	// Get the indices of the top and the left points
+	topIndex = index - (parameters.cloth_width + 1);
+	// left most points do not have a left index.
+	// These are the points which are divisible by the x range
+	leftIndex = index % (parameters.cloth_width + 1) == 0 ?
 										-1 : index - 1;
 
-		// draw a line between the current point and the point at its top
-		if(topConstraint && topIndex >= 0){
-			ctx.moveTo(x,y);
-			ctx.lineTo(cloth[topIndex][0], cloth[topIndex][1]);
-		};
+	// draw a line between the current point and the point at its top
+	if(topConstraint && topIndex >= 0){
+		ctx.moveTo(x,y);
+		ctx.lineTo(cloth[topIndex][0], cloth[topIndex][1]);
+	};
 
     // draw a line between the current point and the point at its left
-		if(leftConstraint && leftIndex >= 0){
-			ctx.moveTo(x,y);
-			ctx.lineTo(cloth[leftIndex][0], cloth[leftIndex][1]);
-		};
+	if(leftConstraint && leftIndex >= 0){
+		ctx.moveTo(x,y);
+		ctx.lineTo(cloth[leftIndex][0], cloth[leftIndex][1]);
+	};
 }
 
 function determine_constraint(constraintType){
@@ -209,29 +194,21 @@ function start() {
         e.preventDefault();
     };
 
-
-    boundsx = canvas.width - 1;
-    boundsy = canvas.height - 1;
-
     ctx.strokeStyle = '#888';
 
     load_variables();
+    boundsx = canvas.width - 1;
+    boundsy = canvas.height - 1;
+
 }
 
 // call this function when the window loads
 window.onload = function () {
-		console.log('Inside window.onload');
-
-		// socket = io.connect('http://localhost:2000', {'forceNew':true });
-		// socket.on('connect', function(){
-		// 	console.log('connected');
-		// });
+	
     canvas = document.getElementById('c');
     ctx = canvas.getContext('2d');
 
-    // canvas.width = 560;
-    // canvas.height = 350;
-
+    
     // detect touch event
     canvas.addEventListener("touchstart", function(event){
         event.preventDefault();
@@ -295,11 +272,3 @@ function getAverage(){
 
 // get average of the readings every 6 seconds
 var average = window.setInterval(getAverage, 6000);
-
- // window.setTimeout(function(){
- // 	document.getElementById('elatency').value = result.avElatency();
- // 	document.getElementById('fps').value = result.avFps();
- // 	//document.getElementById('nlatency').value = result.avNlatency();
- // 	//document.getElementById('bandwidth').value = result.avBandwidth();
- // 	result.reset();
- // }, 1000);

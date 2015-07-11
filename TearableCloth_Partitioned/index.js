@@ -37,7 +37,7 @@
                   res.writeHead(500);
                   return res.end('Error loading index.html');
               }
-              console.log('Connection successful');
+              //console.log('Connection successful');
               res.writeHead(200, {'Content-Type': contentType});
               res.end(data, 'utf-8');
           });

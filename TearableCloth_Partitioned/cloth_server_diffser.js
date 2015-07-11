@@ -42,7 +42,7 @@ function handler(req, res) {
                res.writeHead(500);
                return res.end('Error loading index.html');
            }
-           console.log('Connection successful');
+           //console.log('Connection successful');
            res.writeHead(200, {'Content-Type': contentType});
            res.end(data, 'utf-8');
        });
@@ -115,7 +115,7 @@ io.sockets.on('connection', function(socket){
        cloth.update();
        // encode the simpler version of cloth
        encoded = msgpack.encode(sCloth.points);
-       console.log('Time Taken: ' + (new Date().getTime() - start));
+       //console.log('Time Taken: ' + (new Date().getTime() - start));
        // display the size of cloth. (display only once)
        if(!displayed){
            console.log('Size of Data: ' + encoded.byteLength);

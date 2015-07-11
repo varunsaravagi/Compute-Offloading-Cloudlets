@@ -365,13 +365,13 @@ function start() {
         e.preventDefault();
     };
 
+    ctx.strokeStyle = '#888';
+
+    load_variables();
 
     boundsx = canvas.width - 1;
     boundsy = canvas.height - 1;
 
-    ctx.strokeStyle = '#888';
-
-    load_variables();
     // Define the points and constraints in the cloth
     cloth = new Cloth();
     update();
@@ -381,10 +381,6 @@ window.onload = function () {
 
     canvas = document.getElementById('c');
     ctx = canvas.getContext('2d');
-
-    canvas.width = 560;
-    canvas.height = 350;
-
 
     canvas.addEventListener("touchstart", function(event){
         event.preventDefault();
@@ -444,11 +440,3 @@ function getAverage(){
 
 // get average of the readings every 6 seconds
 var average = window.setInterval(getAverage, 6000);
-
-// window.setInterval(function(){
-// 	document.getElementById('elatency').value = result.avElatency();
-// 	document.getElementById('fps').value = result.avFps();
-// 	//document.getElementById('nlatency').value = result.avNlatency();
-// 	//document.getElementById('bandwidth').value = result.avBandwidth();
-// 	result.reset();
-// }, 1000);
