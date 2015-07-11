@@ -2,55 +2,58 @@ function dataPoints(){
   this.elatency = 0;
   this.nlatency = 0;
   this.fps = 0;
-  this.bandwidth = 0;
   this.counter = 1;
   this.elatencyStore = [];
   this.nlatencyStore = [];
   this.fpsStore = [];
-  this.bandwidthStore = [];
+  this.readings = 0;
 }
 
 dataPoints.prototype = {
-  add : function(elatency, fps){
+  add : function(elatency, lfps){
     this.elatency += elatency;
     //this.nlatency += nlatency;
-    //this.bandwidth += bandwidth;
-    this.fps += fps;
-    //this.elatencyStore.push(elatency);
-    //this.fpsStore.push(fps);
+    if(lfps == "NaN")
+      lfps = 0;
+    this.fps += lfps;
     this.counter += 1;
   },
 
-  avElatency : function(){
-    r = Math.round(this.elatency/this.counter);
-    this.elatencyStore.push(r);
-    return r;
-  },
+  average : function(){
+    avE = (this.elatency/this.counter).toFixed(2);
+    avF = (this.fps/this.counter).toFixed(2);
 
-  avNlatency : function(){
+    // do not store 0 readings
+    if(avE == 0 && avF == 0)
+      return;
+
+    this.elatencyStore.push(avE);
+    this.elatency = 0;
+
+    this.fpsStore.push(avF);
+    this.fps = 0.0;
+
     r = Math.round(this.nlatency/this.counter);
     this.nlatencyStore.push(r);
-    return r;
+    this.nlatency = 0;
+    this.readings++;
+    this.counter = 1;
+
   },
 
-  avFps : function(){
-    r = Math.round(this.fps/this.counter);
-    this.fpsStore.push(r);
-    return r;
-  },
-
-  avBandwidth : function(){
-    r = Math.round(this.bandwidth/this.counter);
-    this.bandwidthStore.push(r);
-    return r;
+  getReadings : function(){
+    return this.readings;
   },
 
   reset : function(){
     this.elatency = 0;
     this.nlatency = 0;
     this.fps = 0;
-    this.bandwidth = 0;
     this.counter = 1;
+    this.elatencyStore = [];
+    this.nlatencyStore = [];
+    this.fpsStore = [];
+    this.readings = 0;
   },
 
   getSElatency : function(){
@@ -63,10 +66,6 @@ dataPoints.prototype = {
 
   getSFps : function(){
     return this.fpsStore;
-  },
-
-  getSBandwidth : function(){
-    return this.bandwidthStore;
   },
 
   getCounter : function(){

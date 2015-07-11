@@ -1,4 +1,5 @@
- /* This file uses a Buffer to store the points and transmit them over the server.
+ /* This file uses socket.io to store the points and transmit them over the server in a binary format.
+
  */
 
  var http = require('http');

@@ -3,7 +3,7 @@ the server and draws them.
 */
 
 
-var client   = new BinaryClient('ws://192.168.1.90:1235');
+var client   = new BinaryClient('ws://128.237.190.151:1235');
 // global parameters
 var parameters = {
 	physics_accuracy : 3,

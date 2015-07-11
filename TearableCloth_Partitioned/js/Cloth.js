@@ -53,6 +53,8 @@ function load_variables(){
     canvas.width = parseInt(document.getElementById('caw_text').value);
     canvas.height = parseInt(document.getElementById('cah_text').value);
     result.reset();
+    window.clearInterval(average);
+    average = window.setInterval(getAverage, 6000);
 };
 
 window.requestAnimFrame =
@@ -94,8 +96,8 @@ var Point = function (x, y) {
     this.constraints = [];
 };
 
-// Add update property to Point
 Point.prototype.update = function (delta) {
+// Add update property to Point
 
     if (mouse.down) {
 
@@ -428,6 +430,20 @@ function send(){
 	};
 	socket.emit('dataPoints', {dataPoints : toSend});
 }
+
+
+function getAverage(){
+	console.log('Getting average');
+	result.average();
+	// send the readngs to server when we have 10 readings
+	if(result.getReadings() == 10){
+		send();
+		alert('Sent to server');
+	}
+}
+
+// get average of the readings every 6 seconds
+var average = window.setInterval(getAverage, 6000);
 
 // window.setInterval(function(){
 // 	document.getElementById('elatency').value = result.avElatency();
