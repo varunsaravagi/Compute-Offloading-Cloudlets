@@ -1,4 +1,4 @@
-function dataPoints(){
+dataPoints = function(){
   this.elatency = 0;
   this.nlatency = 0;
   this.fps = 0;
@@ -25,7 +25,7 @@ dataPoints.prototype = {
 
     // do not store 0 readings
     if(avE == 0 && avF == 0)
-      return;
+      return [0,0];
 
     this.elatencyStore.push(avE);
     this.elatency = 0;
@@ -38,7 +38,7 @@ dataPoints.prototype = {
     this.nlatency = 0;
     this.readings++;
     this.counter = 1;
-
+    return [avE, avF];
   },
 
   getReadings : function(){
@@ -73,3 +73,4 @@ dataPoints.prototype = {
   }
 }
 
+module.exports = dataPoints;

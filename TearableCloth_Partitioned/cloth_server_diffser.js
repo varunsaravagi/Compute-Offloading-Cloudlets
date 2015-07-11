@@ -7,6 +7,8 @@ var fs = require('fs');
 var path = require('path');
 var server = http.createServer(handler);
 var msgpack = require('msgpack-js-browser');
+require('./js/result_server.js');
+require('./js/fps_server.js');
 
 var indexFile = '/index_diffser.html';
 function handler(req, res) {
@@ -90,7 +92,9 @@ var displayed = false;
 server.listen(1234);
 var io = require('socket.io').listen(server);
 var id = 0;
-
+var past;
+var result = new dataPoints();
+var fps = new timer();
 // listen for socket events
 io.sockets.on('connection', function(socket){
 
@@ -106,7 +110,12 @@ io.sockets.on('connection', function(socket){
        // encode and send over the server
        encoded = msgpack.encode(sCloth.points);
        socket.emit('newCloth', {image: true, buffer : encoded})
+       console.log('Reset');
+        result.reset();
+        clearInterval(average);
+        average = setInterval(getAverage, 6000);
    });
+
 
    //received update cloth event from client
    socket.on('updateCloth', function(data){
@@ -124,6 +133,11 @@ io.sockets.on('connection', function(socket){
 
        // emit the updated cloth
        socket.emit('updatedCloth', {image: true, buffer : encoded});
+       eteLatency = past ? (new Date().getTime() - past) : 0;
+       fps.tick(new Date().getTime());
+       lfps = fps.fps(); 
+       result.add(eteLatency,lfps);
+       past = new Date().getTime();
    });
 
    // received mouse event from client
@@ -146,7 +160,30 @@ io.sockets.on('connection', function(socket){
 
 }); // end io.sockets.on
 
+function getAverage(){
+  console.log('Getting average');
+  res = result.average();
+  console.log('Latency: ' + res[0] + ', FPS: ' + res[1]);
+  // send the readngs to server when we have 10 readings
+  if(result.getReadings() == 10){
+    save();
+  }
+}
 
+function save(){
+  elatency = result.getSElatency();
+  lfps = result.getSFps();
+  fileName = 'P'+parameters.physics_accuracy+'_H'+parameters.cloth_height+'_W'+parameters.cloth_width + '.txt';
+  text = '\n\nSocket:\nEnd-to-end Latency: ' + elatency + '\n' +
+       'FPS: ' + lfps;
+  fs.appendFile(fileName, text, function(err){
+    if(err)
+      throw err;
+      console.log('File saved');
+  });
+}
+// get average of the readings every 6 seconds
+var average = setInterval(getAverage, 6000);
 //--------SIMULATION SPECIFIC FUNCTIONS---------------
 
 function create_point(point){

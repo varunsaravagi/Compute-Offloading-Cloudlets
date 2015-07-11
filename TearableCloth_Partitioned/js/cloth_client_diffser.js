@@ -54,8 +54,8 @@ function load_variables(){
     parameters.canvas_width = canvas.width;
     parameters.canvas_height = canvas.height;
 	result.reset();
-	window.clearInterval(average);
-	average = window.setInterval(getAverage, 6000);
+	// window.clearInterval(average);
+	// average = window.setInterval(getAverage, 6000);
 	// send the parameters to the server
 	socket.emit('load_parameters', {'parameters' : parameters});
 };
@@ -76,15 +76,15 @@ socket.on('updatedCloth', function(data){;
     cloth = msgpack.decode(data.buffer);
     draw();
     //eteLatency = new Date().getTime() - rcvData.time;
-    eteLatency = past ? (new Date().getTime() - past) : 0;
     //console.log('Curr: ' + curr + ', Received data: ' + received.time);
-    fps.tick(new Date().getTime());
-    lfps = fps.fps();
-    document.getElementById('elatency').value = eteLatency;//result.avElatency();
-    document.getElementById('fps').value = lfps;//result.avFps();
-    result.add(eteLatency,lfps);
+    //fps.tick(new Date().getTime());
+    //lfps = fps.fps();
     socket.emit('updateCloth', {t : past});
-    past = new Date().getTime();
+    //eteLatency = past ? (new Date().getTime() - past) : 0;    
+    //document.getElementById('elatency').value = eteLatency;//result.avElatency();
+    //document.getElementById('fps').value = lfps;//result.avFps();
+    //result.add(eteLatency,lfps);    
+    //past = new Date().getTime();
 });
 
 })
@@ -271,4 +271,4 @@ function getAverage(){
 }
 
 // get average of the readings every 6 seconds
-var average = window.setInterval(getAverage, 6000);
+//var average = window.setInterval(getAverage, 6000);
