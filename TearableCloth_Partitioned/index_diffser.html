@@ -37,9 +37,9 @@
             <table>
                 <tr>
                     <td> Physics Accuracy </td>
-                    <td> <input type = "range" id="physics_accuracy" min="0" max="1000" value="3" step="5"
+                    <td> <input type = "range" id="physics_accuracy" min="0" max="1000" value="5" step="5"
                         onchange="printValue('physics_accuracy','pa_text')"></td>
-                    <td> <input type = "text" id="pa_text" size="4" value="3" onchange="printValue('pa_text',
+                    <td> <input type = "text" id="pa_text" size="4" value="5" onchange="printValue('pa_text',
                         'physics_accuracy')"></td>
                 </tr>
 
@@ -62,9 +62,9 @@
 
                 <tr>
                     <td> Cloth Height </td>
-                    <td> <input type = "range" id="cloth_height" min="30" max="300" value="60" step="10"
+                    <td> <input type = "range" id="cloth_height" min="30" max="300" value="80" step="10"
                         onchange="printValue('cloth_height','ch_text')"></td>
-                    <td> <input type = "text" id="ch_text" size="4" value="60"
+                    <td> <input type = "text" id="ch_text" size="4" value="80"
                         onchange="printValue('ch_text', 'cloth_height')"></td>
                 </tr>
 
@@ -125,7 +125,7 @@
                 </tr>
 
             </table>
-            <button id="set" onclick="start()"> Set </button>
+            <button id="set" onclick="start(true)"> Set </button>
             <br><br>
             <button id="data" onclick="send()"> Get Data </button>
         </p>
@@ -146,6 +146,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
     <script type="text/javascript" src="js/fps.js"></script>
     <script type="text/javascript" src="js/result.js"></script>
+    <script type="text/javascript" src="js/parameters.js"></script>
     <script type="text/javascript" src="node_modules/msgpack-js-browser/msgpack.js"></script>
     <script type="text/javascript" src="js/cloth_client_diffser.js"></script>
 

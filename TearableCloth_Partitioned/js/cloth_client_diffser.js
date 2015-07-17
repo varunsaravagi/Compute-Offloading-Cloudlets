@@ -7,7 +7,7 @@ var socket = io.connect({'reconnection':false});
 
 // global parameters
 var parameters = {
-	physics_accuracy : 3,
+	  physics_accuracy : 3,
     mouse_influence : 20,
     mouse_cut : 5,
     gravity : 1200,
@@ -53,39 +53,58 @@ function load_variables(){
     canvas.height = parseInt(document.getElementById('cah_text').value);
     parameters.canvas_width = canvas.width;
     parameters.canvas_height = canvas.height;
-	result.reset();
-	// window.clearInterval(average);
-	// average = window.setInterval(getAverage, 6000);
+		result.reset();
+		fps.reset();
+		window.clearInterval(average);
+		average = window.setInterval(getAverage, 6000);
 	// send the parameters to the server
-	socket.emit('load_parameters', {'parameters' : parameters});
+		socket.emit('load_parameters', {'parameters' : parameters});
 };
 
+// // set the variables automatically
+// function set_variables_auto(){
+// 	params = simParams.next();
+// 	if(params == -1){
+// 		alert('end of simulation');
+// 	}
+// 	parameters.physics_accuracy = params.physics;
+// 	parameters.cloth_height = params.cloth_height;
+// 	parameters.cloth_width = params.cloth_width;
+//
+// 	result.reset();
+// 	fps.reset();
+// 	past = null;
+// 	window.clearInterval(average);
+// 	average = window.setInterval(getAverage, 6000);
+// // send the parameters to the server
+// 	socket.emit('load_parameters', {'parameters' : parameters});
+// }
+
+
 socket.on('connect', function(){
-// Received new cloth from the server
-socket.on('newCloth', function(data){
-    cloth = msgpack.decode(data.buffer);
-    draw();
-    socket.emit('updateCloth', {});
-});
+	// Received new cloth from the server
+	socket.on('newCloth', function(data){
+		cloth = msgpack.decode(data.buffer);
+		draw();
+		socket.emit('updateCloth', {});
+	});
 
-var past,
-    curr;
+	var past;
 
-// Received updated cloth from server
-socket.on('updatedCloth', function(data){;
-    cloth = msgpack.decode(data.buffer);
-    draw();
-    //eteLatency = new Date().getTime() - rcvData.time;
-    //console.log('Curr: ' + curr + ', Received data: ' + received.time);
-    //fps.tick(new Date().getTime());
-    //lfps = fps.fps();
-    socket.emit('updateCloth', {t : past});
-    //eteLatency = past ? (new Date().getTime() - past) : 0;    
-    //document.getElementById('elatency').value = eteLatency;//result.avElatency();
-    //document.getElementById('fps').value = lfps;//result.avFps();
-    //result.add(eteLatency,lfps);    
-    //past = new Date().getTime();
-});
+	// Received updated cloth from server
+	socket.on('updatedCloth', function(data){;
+		cloth = msgpack.decode(data.buffer);
+		draw();
+		eteLatency = past ? (new Date().getTime() - past) : 0
+		fps.tick(new Date().getTime());
+		lfps = fps.fps();
+		document.getElementById('fps').value = lfps;
+		document.getElementById('elatency').value = eteLatency;
+		result.add(eteLatency,lfps);
+		past = new Date().getTime();
+		socket.emit('updateCloth', {t : past});
+
+	});
 
 })
 
@@ -195,20 +214,18 @@ function start() {
     };
 
     ctx.strokeStyle = '#888';
-
-    load_variables();
-    boundsx = canvas.width - 1;
-    boundsy = canvas.height - 1;
-
+		load_variables();
+		boundsx = canvas.width - 1;
+		boundsy = canvas.height - 1;
 }
 
 // call this function when the window loads
 window.onload = function () {
-	
+
     canvas = document.getElementById('c');
     ctx = canvas.getContext('2d');
 
-    
+
     // detect touch event
     canvas.addEventListener("touchstart", function(event){
         event.preventDefault();
@@ -271,4 +288,4 @@ function getAverage(){
 }
 
 // get average of the readings every 6 seconds
-//var average = window.setInterval(getAverage, 6000);
+var average = window.setInterval(getAverage, 6000);

@@ -17,5 +17,12 @@ timer.prototype = {
 
 	fpsAv: function(){
 		return Math.round(this.fpsAverage/this.counter);
+	},
+
+	reset: function(){
+		this.elapsed = 0
+		this.last = null
+		this.fpsAverage = 0
+		this.counter = 0
 	}
 }
