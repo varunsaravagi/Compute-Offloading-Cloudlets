@@ -1,0 +1,19 @@
+This is the second reading set obtained as part of the experiments.
+It contains readings for the following two cases:
+
+1. Offloading using Socket.io
+2. No offloading.
+
+The following scenarios are tested:
+
+1. Increasing computation
+2. Increasing data size (this also increases computation to some extent)
+3. Increasing both computation and data size.
+
+- Each file has ~10 readings for each of Latency and FPS. Each reading is an average
+obtained over an interval of 6 seconds.
+- There are two set of readings for Socket in the files.
+-- The first set is the readings obtained while calculating the latency and fps on the 
+client side. The readings had jitters in them.
+-- The second set is the readings obtained while calculating the latency and fps on the 
+server side. The readings did not have any jitters in them.

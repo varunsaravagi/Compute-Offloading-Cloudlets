@@ -121,7 +121,7 @@ io.sockets.on('connection', function(socket){
        // display the size of cloth. (display only once)
        if(!displayed){
            console.log('Size of Data: ' + encoded.byteLength);
-           console.log('Points: ' + sCloth.points.length)
+           //console.log('Points: ' + sCloth.points.length)
            displayed = true;
        }
 
