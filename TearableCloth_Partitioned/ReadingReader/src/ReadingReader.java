@@ -57,7 +57,7 @@ public class ReadingReader {
 		FileWriter out = new FileWriter(dirName);
 		out.write(header);
 		for (File file : dir.listFiles()){
-			reading[0] = file.getName();
+			reading[0] = file.getName().split("\\.")[0];
 			Scanner scan = new Scanner(file);
 			while(scan.hasNextLine()){
 				String line = scan.nextLine();
