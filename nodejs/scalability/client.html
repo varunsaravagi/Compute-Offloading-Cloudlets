@@ -1,0 +1,79 @@
+<html>
+	
+	<head>
+		<meta charset="UTF-8">
+		
+		<style type="text/css">
+		 #text {
+         position: absolute;		 
+		 }
+		</style>
+	   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
+       <!--<script src="http://cdn.binaryjs.com/0/binary.js"></script>-->
+       <script type="text/javascript" src="node_modules/msgpack-js-browser/msgpack.js"></script>
+       <script src="node_modules/binaryjs/dist/binary.js"></script>
+	   <script>
+
+	   		hostname = window.location.hostname;
+			client   = new BinaryClient('ws://localhost:1234');
+			
+			client.on('open', function(){
+				// console.log('Inside client.on');
+				// stream = client.send(10000, 'size');
+				// stream.on('data', function(data){
+				// 	var receiveTime = new Date().getTime();
+				// 	console.log(data);
+				// 	decoded = msgpack.decode(data.no);
+				// 	timeTaken = receiveTime - decoded.t;
+				// 	document.getElementById("time").innerHTML = timeTaken;		
+				// });
+			});
+			function start(){
+				stream = client.send(document.getElementById("size").value, 'size');
+				stream.on('data', function(data){
+					decoded = msgpack.decode(data.no);
+					var receiveTime = new Date().getTime();					
+					timeTaken = receiveTime - decoded.t;
+					document.getElementById("time").innerHTML = timeTaken;
+				});			
+			/**/
+			}
+			/*function start(){
+				var stream;
+				client.on('open', function(){
+					stream = client.send(document.getElementById("size").value, 'size');
+					stream.on('data', function(data){
+						var receiveTime = new Date().getTime();
+						timeTaken = receiveTime - data.no.t;
+						document.getElementById("time").innerHTML = timeTaken;		
+					})
+				});
+
+				// socket.emit('start', {size : document.getElementById("size").value});
+				// socket.on('send', function(data){
+				// var receiveTime = new Date().getTime();
+				// timeTaken = receiveTime - data.params.t;
+				// document.getElementById("time").innerHTML = timeTaken;
+			};*/
+
+	   </script>
+	   
+		<title> Client page</title>
+	</head>
+	
+	<body>
+	
+	    <div>
+         Enter number of elements: <input type="text" name="elements" id="size"/> 
+         <br/><br/>
+         <input type="button" name="submit" value="submit" onclick="start()"/>
+        </div>  		
+	    <div>  		    
+		  Result: <br/> 
+          <br/><br/>
+          Time Taken (ms): <br/>
+          <p id="time"></p>              
+		</div>
+		
+	</body>
+</html>
