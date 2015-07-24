@@ -7,8 +7,9 @@ var fs = require('fs');
 var path = require('path');
 var server = http.createServer(handler);
 var msgpack = require('msgpack-js-browser');
+var WebSocket = require('ws').Server;
 
-var indexFile = '/index_diffser.html';
+var indexFile = '/index_ws.html';
 function handler(req, res) {
    var filePath = __dirname + indexFile;
 
@@ -88,70 +89,72 @@ var parameters;
 var displayed = false;
 
 server.listen(1234);
-var io = require('socket.io').listen(server);
+var wss = new WebSocket({server : server});
 var id = 0;
 var past;
-// listen for socket events
-io.sockets.on('connection', function(socket){
 
-   // received parameters from client.
-   socket.on('load_parameters', function(data){
-       parameters = data.parameters;
-       console.log(parameters.physics_accuracy +' ' + parameters.cloth_height + ' ' + parameters.cloth_width);
-       boundsx = parameters.canvas_width - 1;
-       boundsy = parameters.canvas_height - 1;
-       // initialize the cloth
-       sCloth = new SerializedCloth();
-       cloth = new Cloth();
-       displayed = false;
-       // encode and send over the server
-       encoded = msgpack.encode(sCloth.points);
-       //socket.emit('newCloth', {'cloth' : sCloth.points});
-       socket.emit('newCloth', {image: true, buffer : encoded})
-   });
+wss.on('connection', function(ws){
+  ws.on('message', function incoming(message){
+    var data = JSON.parse(message);
+    //console.log(message);
+    switch (data.id) {
+      case 'load_parameters':
+        parameters = data.params;
+        console.log(parameters.physics_accuracy +' ' + parameters.cloth_height + ' ' + parameters.cloth_width);
+        boundsx = parameters.canvas_width - 1;
+        boundsy = parameters.canvas_height - 1;
+        // initialize the cloth
+        sCloth = new SerializedCloth();
+        cloth = new Cloth();
+        displayed = false;
+        // encode and send over the server
+        encoded = msgpack.encode(sCloth.points);
+        var buffer = new Buffer( new Uint8Array(encoded));
+        ws.send(buffer);
+        break;
+
+      case 'updateCloth':
+        start = new Date().getTime();
+        // update the cloth
+        cloth.update();
+        // encode the simpler version of cloth
+        encoded = msgpack.encode(sCloth.points);
+        console.log('Time Taken: ' + (new Date().getTime() - start));
+        // display the size of cloth. (display only once)
+        if(!displayed){
+            console.log('Size of Data: ' + encoded.byteLength);
+            //console.log('Points: ' + sCloth.points.length)
+            displayed = true;
+        }
+        var buffer = new Buffer( new Uint8Array(encoded));
+        ws.send(buffer);
+        break;
+
+      case 'mouse':
+      console.log('received mouse');
+        mouse = data.mouseData;
+        break;
+
+      case 'dataPoints':
+        text = '\n\nSocket:\nEnd-to-end Latency: ' + data.elatency + '\n' +
+          'FPS: ' + data.fps;
+        name = data.name + '.txt';
+        fs.appendFile(name, text, function(err){
+          if(err)
+            throw err;
+          console.log('File saved');
+        });
+        break;
+    }
 
 
-   //received update cloth event from client
-   socket.on('updateCloth', function(data){
-       start = new Date().getTime();
-       // update the cloth
-       cloth.update();
-       // encode the simpler version of cloth
-       encoded = msgpack.encode(sCloth.points);
-       console.log('Time Taken: ' + (new Date().getTime() - start));
-       // display the size of cloth. (display only once)
-       if(!displayed){
-           console.log('Size of Data: ' + encoded.byteLength);
-           //console.log('Points: ' + sCloth.points.length)
-           displayed = true;
-       }
+  });
 
-       // emit the updated cloth
-       //socket.emit('updatedCloth', {'cloth' : sCloth.points});
-       socket.emit('updatedCloth', {image: true, buffer : encoded});
-   });
+});
 
-   // received mouse event from client
-   socket.on('mouse', function(data){
-       console.log('received mouse');
-       mouse = data.mouseData;
-       socket.emit('receivedMouse', {});
-   });
 
-   // received data points from client. Store them in a file.
-   socket.on('dataPoints', function(data){
-     dataPoints = data.dataPoints;
-     text = '\n\nSocket:\nEnd-to-end Latency: ' + dataPoints.elatency + '\n' +
-       'FPS: ' + dataPoints.fps;
-     name = dataPoints.name + '.txt';
-     fs.appendFile(name, text, function(err){
-       if(err)
-         throw err;
-       console.log('File saved');
-     })
-   });
 
-}); // end io.sockets.on
+
 
 //--------SIMULATION SPECIFIC FUNCTIONS---------------
 
@@ -404,7 +407,7 @@ var Cloth = function () {
 
 // update the points in the cloth : COMPUTATION
 Cloth.prototype.update = function () {
-  console.log('start update');
+   console.log('start update');
    var i = parameters.physics_accuracy;
 
    // Resolve the constraints for all the points physics_accuracy number of times
@@ -419,5 +422,7 @@ Cloth.prototype.update = function () {
    // update all the points by delta amount. Brings swaying motion to the cloth
    while (i--)
        this.points[i].update(.016);
-   console.log('end update');
+
+  console.log('end update');
+
 };

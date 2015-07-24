@@ -69,6 +69,7 @@
             totalNumbers = message;
             numbers = [];
             console.log('Total numbers: ' + totalNumbers);
+            var start = new Date().getTime();
             for(i=0;i<totalNumbers;i++){
                 array = [];
                 for(j=0;j<6;j++){
@@ -76,16 +77,19 @@
                     array.push(n);
                 }
                 numbers.push(array);
-            }            
-            console.log('Event emitted at: ' + emitTime.getHours() + ':' + 
-                emitTime.getMinutes() + ':' + emitTime.getSeconds() + ':' + emitTime.getMilliseconds());
+            }
+            console.log('Time taken to generate: ' + (new Date().getTime()-start));            
+             console.log('Event emitted at: ' + emitTime.getHours() + ':' + 
+                 emitTime.getMinutes() + ':' + emitTime.getSeconds() + ':' + emitTime.getMilliseconds());
             d = {
                 t : emitTime.getTime(),
                 n : numbers
             }
             encoded = msgpack.encode(d);
             console.log('Size of data in bytes: ' + encoded.byteLength);
-            var buffer = new Buffer( new Uint8Array(encoded));
+            var start = new Date().getTime();
+            var buffer = new Buffer( new Uint8Array(encoded));            
+            console.log('Time taken to convert: ' + (new Date().getTime()-start));
             //ws.send(buffer, { binary: true});
             ws.send(buffer);
         });

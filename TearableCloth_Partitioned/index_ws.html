@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tearable Cloth</title>
+    <meta name="viewport" http-equiv="content-type" content="text/html;charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+
+</head>
+
+<body>
+
+    <canvas id="c"></canvas>
+    <div id="info">
+        <table>
+          <tr>
+            <td>E-E Latency </td>
+            <td><input type="text" id="elatency" disabled="disabled" size="4"></td>
+          </tr>
+          <!-- <tr>
+            <td>Network Latency </td>
+            <td><input type="text" id="nlatency" disabled="disabled" size="4"></td>
+          </tr> -->
+          <tr>
+            <td>FPS </td>
+            <td><input type="text" id="fps" disabled="disabled" size="4"></td>
+          </tr>
+          <!-- <tr>
+            <td>Bandwidth </td>
+            <td><input type="text" id="bandwidth" disabled="disabled" size="4"></td>
+          </tr> -->
+        </table>
+    </div>
+
+    <div id="controls">
+        <p>
+            <table>
+                <tr>
+                    <td> Physics Accuracy </td>
+                    <td> <input type = "range" id="physics_accuracy" min="0" max="1000" value="5" step="5"
+                        onchange="printValue('physics_accuracy','pa_text')"></td>
+                    <td> <input type = "text" id="pa_text" size="4" value="5" onchange="printValue('pa_text',
+                        'physics_accuracy')"></td>
+                </tr>
+
+                <tr>
+                    <td> Mouse Influence </td>
+                    <td> <input type = "range" id="mouse_influence" min="10" max="100" value="20" step="5"
+                        onchange="printValue('mouse_influence','mi_text')"></td>
+                    <td> <input type = "text" id="mi_text" size="4" value="20"
+                        onchange="printValue('mi_text','mouse_influence')"></td>
+                </tr>
+
+                <tr>
+                    <td> Mouse Cut </td>
+                    <td> <input type = "range" id="mouse_cut" min="1" max="30" value="5" step="1"
+                        onchange="printValue('mouse_cut','mc_text')"></td>
+                    <td> <input type = "text" id="mc_text" size="4" value="5"
+                        onchange="printValue('mc_text','mouse_cut')"></td>
+                </tr>
+
+
+                <tr>
+                    <td> Cloth Height </td>
+                    <td> <input type = "range" id="cloth_height" min="30" max="300" value="80" step="10"
+                        onchange="printValue('cloth_height','ch_text')"></td>
+                    <td> <input type = "text" id="ch_text" size="4" value="80"
+                        onchange="printValue('ch_text', 'cloth_height')"></td>
+                </tr>
+
+                <tr>
+                    <td> Cloth Width </td>
+                    <td> <input type = "range" id="cloth_width" min="50" max="500" value="90" step="10"
+                        onchange="printValue('cloth_width','cw_text')"></td>
+                    <td> <input type = "text" id="cw_text" size="4" value="90"
+                        onchange="printValue('cw_text','cloth_width')"></td>
+                </tr>
+
+                <tr>
+                    <td> Gravity </td>
+                    <td> <input type = "range" id="gravity" min="500" max="2500" value="1200" step="50"
+                        onchange="printValue('gravity','g_text')"></td>
+                    <td> <input type = "text" id="g_text" size="4" value="1200"
+                        onchange="printValue('g_text','gravity')"></td>
+                </tr>
+
+                <tr>
+                    <td> Start Y </td>
+                    <td> <input type = "range" id="start_y" min="20" max="100" value="20" step="10"
+                        onchange="printValue('start_y','sy_text')"></td>
+                    <td> <input type = "text" id="sy_text" size="4" value="20"
+                        onchange="printValue('sy_text','start_y')"></td>
+                </tr>
+
+                <tr>
+                    <td> Spacing </td>
+                    <td> <input type = "range" id="spacing" min="1" max="50" value="3" step="1"
+                        onchange="printValue('spacing','s_text')"></td>
+                    <td> <input type = "text" id="s_text" size="4" value="3"
+                        onchange="printValue('s_text','spacing')"></td>
+                </tr>
+
+                <tr>
+                    <td> Tear Distance </td>
+                    <td> <input type = "range" id="tear_distance" min="30" max="300" value="60" step="10"
+                        onchange="printValue('tear_distance','td_text')"></td>
+                    <td> <input type = "text" id="td_text" size="4" value="60"
+                        onchange="printValue('td_text','tear_distance')"></td>
+                </tr>
+
+                <tr>
+                    <td> Canvas width </td>
+                    <td> <input type = "range" id="canvas_width" min="400" max="1200" value="1200" step="50"
+                        onchange="printValue('canvas_width','caw_text')"></td>
+                    <td> <input type = "text" id="caw_text" size="4" value="1200"
+                        onchange="printValue('caw_text','canvas_width')"></td>
+                </tr>
+
+                <tr>
+                    <td> Canvas Height </td>
+                    <td> <input type = "range" id="canvas_height" min="300" max="800" value="800" step="50"
+                        onchange="printValue('canvas_height','cah_text')"></td>
+                    <td> <input type = "text" id="cah_text" size="4" value="800"
+                        onchange="printValue('cah_text','canvas_height')"></td>
+                </tr>
+
+            </table>
+            <button id="set" onclick="start(true)"> Set </button>
+            <br><br>
+            <button id="data" onclick="send()"> Get Data </button>
+        </p>
+    </div>
+
+    <script type="text/javascript">
+        function printValue(id1, id2){
+            var sValue = document.getElementById(id1).value;
+            document.getElementById(id2).value = sValue;
+        };
+
+         window.onload = function (){
+             printValue('mouse_influence', 'mi_text');
+         };
+
+    </script>    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
+    <script type="text/javascript" src="js/fps.js"></script>
+    <script type="text/javascript" src="js/result.js"></script>
+    <script type="text/javascript" src="node_modules/msgpack-js-browser/msgpack.js"></script>
+    <script type="text/javascript" src="js/cloth_client_ws.js"></script>
+
+</body>
+
+</html>

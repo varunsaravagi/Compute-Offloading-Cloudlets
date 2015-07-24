@@ -2,12 +2,16 @@
 the server and draws them.
 */
 
-// get the socket connection
-var socket = io.connect();
+// Establish the ws connection
+var ws = new WebSocket('ws://' + '192.168.1.97' + ':1234');
+ws.binaryType = 'arraybuffer';
+ws.onopen = function event(){
+                    //ws.send("connected");
+}
 
 // global parameters
 var parameters = {
-	  physics_accuracy : 3,
+	physics_accuracy : 3,
     mouse_influence : 20,
     mouse_cut : 5,
     gravity : 1200,
@@ -58,41 +62,31 @@ function load_variables(){
 	window.clearInterval(average);
 	average = window.setInterval(getAverage, 6000);
 	// send the parameters to the server
-	socket.emit('load_parameters', {'parameters' : parameters});
+	var data = {
+        id : 'load_parameters',
+        params : parameters
+    };
+    ws.send(JSON.stringify(data));
 };
 
-socket.on('connect', function(){
-	// Received new cloth from the server
-	socket.on('newCloth', function(data){
-		//cloth = data.cloth;
-        cloth = msgpack.decode(data.buffer);
-		draw();
-		socket.emit('updateCloth', {});
-	});
-
-	var past;
-
-	// Received updated cloth from server
-	socket.on('updatedCloth', function(data){
-		//cloth = data.cloth;
-        cloth = msgpack.decode(data.buffer);
-		draw();
-		eteLatency = past ? (new Date().getTime() - past) : 0
-		fps.tick(new Date().getTime());
-		lfps = fps.fps();
-		document.getElementById('fps').value = lfps;
-		document.getElementById('elatency').value = eteLatency;
-		result.add(eteLatency,lfps);
-		past = new Date().getTime();
-		socket.emit('updateCloth', {t : past});
-
-	});
-
-    socket.on('receivedMouse', function(data){
-
-    });
-
-})
+var past;
+ws.onmessage = function(event){
+    cloth = msgpack.decode(event.data);
+    console.log(event);
+    draw();
+    curr = new Date().getTime();
+    eteLatency = past ? (curr - past) : 0;
+    fps.tick(curr);
+    lfps = fps.fps();
+    document.getElementById('fps').value = lfps;
+    document.getElementById('elatency').value = eteLatency;
+    result.add(eteLatency,lfps);
+    past = new Date().getTime();
+    var data = {
+        id : 'updateCloth'
+    };
+    ws.send(JSON.stringify(data));
+}
 
 // Draw the cloth
 function draw() {
@@ -164,10 +158,8 @@ function determine_constraint(constraintType){
 	return [leftConstraint, topConstraint];
 }
 // start the simulation
-function start(reconnect) {
-    if(reconnect){
-        socket = io.connect({'forceNew' : true});
-    }
+function start() {
+
     canvas.onmousedown = function (e) {
         mouse.button = e.which;
         mouse.px = mouse.x;
@@ -176,14 +168,14 @@ function start(reconnect) {
         mouse.x = e.clientX - rect.left,
         mouse.y = e.clientY - rect.top,
         mouse.down = true;
-        socket.emit('mouse', {mouseData:mouse});
+        send_mouse();
         e.preventDefault();
 
     };
 
     canvas.onmouseup = function (e) {
         mouse.down = false;
-        socket.emit('mouse', {mouseData:mouse});
+        send_mouse();
         e.preventDefault();
     };
 
@@ -193,7 +185,7 @@ function start(reconnect) {
         var rect = canvas.getBoundingClientRect();
         mouse.x = e.clientX - rect.left,
         mouse.y = e.clientY - rect.top,
-        socket.emit('mouse', {mouseData:mouse});
+        send_mouse();
         e.preventDefault();
     };
 
@@ -202,9 +194,9 @@ function start(reconnect) {
     };
 
     ctx.strokeStyle = '#888';
-	load_variables();
-	boundsx = canvas.width - 1;
-	boundsy = canvas.height - 1;
+		load_variables();
+		boundsx = canvas.width - 1;
+		boundsy = canvas.height - 1;
 }
 
 // call this function when the window loads
@@ -225,7 +217,7 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         mouse.down = true;
-        socket.emit('mouse', {mouseData:mouse});
+        send_mouse();
     }, false);
 
     // detect touch movement
@@ -238,7 +230,7 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         event.preventDefault();
-        socket.emit('mouse', {mouseData:mouse});
+        send_mouse();
         //console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");
     }, false);
 
@@ -247,22 +239,31 @@ window.onload = function () {
         event.preventDefault();
         mouse.down = false;
         event.preventDefault();
-        socket.emit('mouse', {mouseData:mouse});
+        send_mouse();
     }, false);
 
     start();
 };
+
+function send_mouse(){
+    var data = {
+        id : 'mouse',
+        mouseData : mouse
+    };
+    ws.send(JSON.stringify(data));
+}
 
 function send(){
 	elatency = result.getSElatency();
 	lfps = result.getSFps();
 	fileName = 'P'+parameters.physics_accuracy+'_H'+parameters.cloth_height+'_W'+parameters.cloth_width;
 	toSend = {
+        id : 'dataPoints',
 		name : fileName,
 		elatency : elatency,
 		fps : lfps
 	};
-	socket.emit('dataPoints', {dataPoints : toSend});
+    ws.send(JSON.stringify(toSend));
 }
 
 function getAverage(){

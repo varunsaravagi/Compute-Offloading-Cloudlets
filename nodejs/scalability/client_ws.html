@@ -13,23 +13,27 @@
        <script type="text/javascript" src="node_modules/msgpack-js-browser/msgpack.js"></script>
        <script src="node_modules/binaryjs/dist/binary.js"></script>
 	   <script>
-
+	   		var startTime;
 	   		hostname = window.location.hostname;
-			var ws = new WebSocket('ws://' + 'localhost' + ':1234');
+			var ws = new WebSocket('ws://' + '192.168.1.97' + ':1234');
 			ws.binaryType = 'arraybuffer';
 			ws.onopen = function event(){
 				//ws.send("connected");
 			}			
 			ws.onmessage =  function(event){
-				var receiveTime = new Date().getTime();
+				// var receiveTime = new Date();
+				// console.log('Event emitted at: ' + receiveTime.getHours() + ':' + 
+    //              receiveTime.getMinutes() + ':' + receiveTime.getSeconds() + ':' + receiveTime.getMilliseconds());
 				message = event.data;
-				console.log(message);
+				//console.log(message);
 				decoded = msgpack.decode(message);
-				timeTaken = receiveTime - decoded.t;
+				console.log(decoded);
+				timeTaken = new Date().getTime() - startTime;
 				document.getElementById("time").innerHTML = timeTaken;		
 			};
 
 			function start(){
+				startTime = new Date().getTime();
 				ws.send(document.getElementById("size").value);					
 			}
 
