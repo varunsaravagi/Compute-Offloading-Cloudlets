@@ -2,7 +2,7 @@ function dataPoints(){
   this.elatency = 0;
   this.nlatency = 0;
   this.fps = 0;
-  this.counter = 1;
+  this.counter = 0;
   this.elatencyStore = [];
   this.nlatencyStore = [];
   this.fpsStore = [];
@@ -37,7 +37,7 @@ dataPoints.prototype = {
     this.nlatencyStore.push(r);
     this.nlatency = 0;
     this.readings++;
-    this.counter = 1;
+    this.counter = 0;
 
   },
 
@@ -49,7 +49,7 @@ dataPoints.prototype = {
     this.elatency = 0;
     this.nlatency = 0;
     this.fps = 0;
-    this.counter = 1;
+    this.counter = 0;
     this.elatencyStore = [];
     this.nlatencyStore = [];
     this.fpsStore = [];

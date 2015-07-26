@@ -106,15 +106,15 @@ io.sockets.on('connection', function(socket){
        displayed = false;
 
        id++;
-       var p = {
+       /*var p = {
          cloth : sCloth.points,
          id : id,
          time: new Date().getTime()
-       };
+       };*/
 
        // encode and send over the server
-       //encoded = msgpack.encode(sCloth.points);
-       encoded = msgpack.encode(p);
+       encoded = msgpack.encode(sCloth.points);
+       //encoded = msgpack.encode(p);
        //socket.emit('newCloth', {'cloth' : sCloth.points});
        socket.emit('updatedCloth', {image: true, buffer : encoded})
    });
@@ -125,17 +125,17 @@ io.sockets.on('connection', function(socket){
        start = new Date().getTime();
        // update the cloth
        cloth.update();
-       var p = {
+       /*var p = {
          cloth : sCloth.points,
          id : id,
          time: new Date().getTime()
-       };
-       console.log('---------');
+       };*/
+       //console.log('---------');
        //console.log('Emit: ' + p.id + ' @ ' + p.time);
        // encode the simpler version of cloth
-       //encoded = msgpack.encode(sCloth.points);
-       encoded = msgpack.encode(p);
-       console.log('Time Taken: ID ' + id + ' ' + (new Date().getTime() - start));
+       encoded = msgpack.encode(sCloth.points);
+       //encoded = msgpack.encode(p);
+       console.log('Time Taken: '+(new Date().getTime() - start));
        // display the size of cloth. (display only once)
        if(!displayed){
            console.log('Size of Data: ' + encoded.byteLength);
@@ -146,12 +146,12 @@ io.sockets.on('connection', function(socket){
        // emit the updated cloth
        //socket.emit('updatedCloth', {'cloth' : sCloth.points});
        socket.emit('updatedCloth', {image: true, buffer : encoded});
-       console.log('---------');
+       //console.log('---------');
    });
 
    // received mouse event from client
    socket.on('mouse', function(data){
-       console.log('received mouse');
+       //console.log('received mouse');
        mouse = data.mouseData;
        //socket.emit('receivedMouse', {});
    });
@@ -422,7 +422,7 @@ var Cloth = function () {
 
 // update the points in the cloth : COMPUTATION
 Cloth.prototype.update = function () {
-  console.log('start update');
+  //console.log('start update');
    var i = parameters.physics_accuracy;
 
    // Resolve the constraints for all the points physics_accuracy number of times
@@ -437,5 +437,5 @@ Cloth.prototype.update = function () {
    // update all the points by delta amount. Brings swaying motion to the cloth
    while (i--)
        this.points[i].update(.016);
-   console.log('end update');
+   //console.log('end update');
 };
