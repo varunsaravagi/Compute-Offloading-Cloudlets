@@ -3,7 +3,7 @@ the server and draws them.
 */
 
 // Establish the ws connection
-var ws = new WebSocket('ws://' + '192.168.1.97' + ':1234');
+var ws = new WebSocket('ws://' + '128.237.190.151' + ':1234');
 ws.binaryType = 'arraybuffer';
 ws.onopen = function event(){
                     //ws.send("connected");

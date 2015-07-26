@@ -37,6 +37,7 @@ var canvas,
 
 var fps = new timer();
 var result = new dataPoints();
+var ignoreReadings = 5; //ignore initial 5 readings.
 
 // Load the parameters required for simulation
 function load_variables(){
@@ -53,19 +54,20 @@ function load_variables(){
     canvas.height = parseInt(document.getElementById('cah_text').value);
     parameters.canvas_width = canvas.width;
     parameters.canvas_height = canvas.height;
-	result.reset();
-	fps.reset();
-	window.clearInterval(average);
-	average = window.setInterval(getAverage, 6000);
-	// send the parameters to the server
-	socket.emit('load_parameters', {'parameters' : parameters});
+		result.reset();
+		fps.reset();
+		ignoreReadings = 5;
+		window.clearInterval(average);
+		average = window.setInterval(getAverage, 6000);
+		// send the parameters to the server
+		socket.emit('load_parameters', {'parameters' : parameters});
 };
 
 socket.on('connect', function(){
 	// Received new cloth from the server
 	socket.on('newCloth', function(data){
 		//cloth = data.cloth;
-        cloth = msgpack.decode(data.buffer);
+    cloth = msgpack.decode(data.buffer);
 		draw();
 		socket.emit('updateCloth', {});
 	});
@@ -75,22 +77,32 @@ socket.on('connect', function(){
 	// Received updated cloth from server
 	socket.on('updatedCloth', function(data){
 		//cloth = data.cloth;
-        cloth = msgpack.decode(data.buffer);
+    //cloth = msgpack.decode(data.buffer);
+		d = msgpack.decode(data.buffer);
+		cloth = d.cloth;
+		//console.log('Recieved cloth: id: ' + d.id + ', time: ' + d.time + ' @ ' + new Date().getTime());
 		draw();
-		eteLatency = past ? (new Date().getTime() - past) : 0
+		//eteLatency = past ? (new Date().getTime() - past) : 0
+		eteLatency = (new Date().getTime() - past);
+		console.log('Latency for ID: ' + d.id + ' is ' + eteLatency);
 		fps.tick(new Date().getTime());
 		lfps = fps.fps();
 		document.getElementById('fps').value = lfps;
 		document.getElementById('elatency').value = eteLatency;
-		result.add(eteLatency,lfps);
+		// Do not add the initial ignoreReadings value
+		if(ignoreReadings == 0){
+				result.add(eteLatency,lfps);
+		}
+		else{
+			ignoreReadings -= 1;
+		}
+		socket.emit('updateCloth', {});
 		past = new Date().getTime();
-		socket.emit('updateCloth', {t : past});
-
 	});
 
-    socket.on('receivedMouse', function(data){
-
-    });
+    // socket.on('receivedMouse', function(data){
+		//
+    // });
 
 })
 
@@ -165,9 +177,14 @@ function determine_constraint(constraintType){
 }
 // start the simulation
 function start(reconnect) {
-    if(reconnect){
-        socket = io.connect({'forceNew' : true});
-    }
+    // if(reconnect){
+    //     socket = io.connect({'forceNew' : true});
+    // }
+		//socket.disconnect();
+		socket.receiveBuffer = [];
+		socket.sendBuffer = [];
+		io.packetBuffer = [];
+		//socket.connect();
     canvas.onmousedown = function (e) {
         mouse.button = e.which;
         mouse.px = mouse.x;

@@ -104,21 +104,38 @@ io.sockets.on('connection', function(socket){
        sCloth = new SerializedCloth();
        cloth = new Cloth();
        displayed = false;
-       // encode and send over the server
-       encoded = msgpack.encode(sCloth.points);
-       //socket.emit('newCloth', {'cloth' : sCloth.points});
-       socket.emit('newCloth', {image: true, buffer : encoded})
-   });
 
+       id++;
+       var p = {
+         cloth : sCloth.points,
+         id : id,
+         time: new Date().getTime()
+       };
+
+       // encode and send over the server
+       //encoded = msgpack.encode(sCloth.points);
+       encoded = msgpack.encode(p);
+       //socket.emit('newCloth', {'cloth' : sCloth.points});
+       socket.emit('updatedCloth', {image: true, buffer : encoded})
+   });
 
    //received update cloth event from client
    socket.on('updateCloth', function(data){
+       id++;
        start = new Date().getTime();
        // update the cloth
        cloth.update();
+       var p = {
+         cloth : sCloth.points,
+         id : id,
+         time: new Date().getTime()
+       };
+       console.log('---------');
+       //console.log('Emit: ' + p.id + ' @ ' + p.time);
        // encode the simpler version of cloth
-       encoded = msgpack.encode(sCloth.points);
-       console.log('Time Taken: ' + (new Date().getTime() - start));
+       //encoded = msgpack.encode(sCloth.points);
+       encoded = msgpack.encode(p);
+       console.log('Time Taken: ID ' + id + ' ' + (new Date().getTime() - start));
        // display the size of cloth. (display only once)
        if(!displayed){
            console.log('Size of Data: ' + encoded.byteLength);
@@ -129,13 +146,14 @@ io.sockets.on('connection', function(socket){
        // emit the updated cloth
        //socket.emit('updatedCloth', {'cloth' : sCloth.points});
        socket.emit('updatedCloth', {image: true, buffer : encoded});
+       console.log('---------');
    });
 
    // received mouse event from client
    socket.on('mouse', function(data){
        console.log('received mouse');
        mouse = data.mouseData;
-       socket.emit('receivedMouse', {});
+       //socket.emit('receivedMouse', {});
    });
 
    // received data points from client. Store them in a file.
