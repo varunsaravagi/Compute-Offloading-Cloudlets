@@ -135,7 +135,7 @@ io.sockets.on('connection', function(socket){
        // encode the simpler version of cloth
        encoded = msgpack.encode(sCloth.points);
        //encoded = msgpack.encode(p);
-       console.log('Time Taken: '+(new Date().getTime() - start));
+       //console.log('Time Taken: '+(new Date().getTime() - start));
        // display the size of cloth. (display only once)
        if(!displayed){
            console.log('Size of Data: ' + encoded.byteLength);
