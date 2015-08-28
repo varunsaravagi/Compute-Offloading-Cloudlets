@@ -1,5 +1,10 @@
-/* This file uses socket.io to store the points and transmit them over the server in a binary format.
-Only an array of points is being sent over the network. The neighbours would be re-discovered at the client.
+/*
+ This file used the bare bone WebSocket library to transmit data over the network.
+ It was written to compare performance with socket.io
+
+ Corresponding client js file: js/cloth_client_ws.js
+ Corresponding html file: index_ws.html
+ -Obsolete as of now-
 */
 
 var http = require('http');

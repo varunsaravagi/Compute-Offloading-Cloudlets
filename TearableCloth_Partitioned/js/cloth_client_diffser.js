@@ -56,8 +56,8 @@ function load_variables(){
     parameters.canvas_height = canvas.height;
 	result.reset();
 	fps.reset();
-	window.clearInterval(average);
-	average = window.setInterval(getAverage, 6000);
+	//window.clearInterval(average);
+	//average = window.setInterval(getAverage, 6000);
 	// send the parameters to the server
 	socket.emit('load_parameters', {'parameters' : parameters});
 };
@@ -67,6 +67,7 @@ socket.on('connect', function(){
 	socket.on('newCloth', function(data){
 		//cloth = data.cloth;
     cloth = msgpack.decode(data.buffer);
+
 		draw();
 		socket.emit('updateCloth', {});
 	});
@@ -77,6 +78,8 @@ socket.on('connect', function(){
 	socket.on('updatedCloth', function(data){
 		//cloth = data.cloth;
         cloth = msgpack.decode(data.buffer);
+				encode = msgpack.encode(cloth);
+				cloth = msgpack.decode(encode);
 		//d = msgpack.decode(data.buffer);
 		//cloth = d.cloth;
 		//console.log('Recieved cloth: id: ' + d.id + ', time: ' + d.time + ' @ ' + new Date().getTime());
@@ -175,11 +178,11 @@ function determine_constraint(constraintType){
 }
 // start the simulation
 function start(reconnect) {
-		
+
 	socket.receiveBuffer = [];
 	socket.sendBuffer = [];
 	io.packetBuffer = [];
-    
+
     canvas.onmousedown = function (e) {
         mouse.button = e.which;
         mouse.px = mouse.x;
@@ -288,4 +291,4 @@ function getAverage(){
 }
 
 // get average of the readings every 6 seconds
-var average = window.setInterval(getAverage, 6000);
+//var average = window.setInterval(getAverage, 6000);

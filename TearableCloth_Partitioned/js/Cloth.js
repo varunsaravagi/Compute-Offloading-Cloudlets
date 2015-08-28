@@ -20,10 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-// settings
-function getValue(elementId){
-    return document.getElementById(elementId).value;
-}
+// ORIGINAL CODE
+
 
 var socket = io.connect();
 // parameters required for simulation

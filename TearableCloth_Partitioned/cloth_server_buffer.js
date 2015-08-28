@@ -1,5 +1,8 @@
- /* This file uses socket.io to store the points and transmit them over the server in a binary format.
-
+ /*
+ This file uses socket.io to store the points and transmit them over the server in a binary format.
+ Corresponding client js file: js/cloth_client_buffer.js
+ Corresponding html: index_buffer.html
+ -Obsolete as of now-
  */
 
  var http = require('http');
@@ -163,7 +166,6 @@ function create_point(point){
         serializedPoint[j++] = point.constraints[i].p2.y;
     }
     return serializedPoint;
-    //return new Buffer(serializedPoint.toString().concat(':'));
 };
 
 var SerializedCloth = function(){

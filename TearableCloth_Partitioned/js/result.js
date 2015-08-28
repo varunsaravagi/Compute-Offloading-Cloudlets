@@ -1,10 +1,13 @@
+/*
+ This file contains functions to store and average the readings. It is used
+ only at the client side.
+*/
+
 function dataPoints(){
-  this.elatency = 0;
-  this.nlatency = 0;
-  this.fps = 0;
+  this.elatency = 0; //end-to-end latency
+  this.fps = 0; // fps
   this.counter = 0;
   this.elatencyStore = [];
-  this.nlatencyStore = [];
   this.fpsStore = [];
   this.readings = 0;
 }
@@ -12,7 +15,6 @@ function dataPoints(){
 dataPoints.prototype = {
   add : function(elatency, lfps){
     this.elatency += elatency;
-    //this.nlatency += nlatency;
     if(lfps == "NaN")
       lfps = 0;
     this.fps += lfps;
@@ -33,9 +35,6 @@ dataPoints.prototype = {
     this.fpsStore.push(avF);
     this.fps = 0.0;
 
-    r = Math.round(this.nlatency/this.counter);
-    this.nlatencyStore.push(r);
-    this.nlatency = 0;
     this.readings++;
     this.counter = 0;
 
@@ -47,21 +46,15 @@ dataPoints.prototype = {
 
   reset : function(){
     this.elatency = 0;
-    this.nlatency = 0;
     this.fps = 0;
     this.counter = 0;
     this.elatencyStore = [];
-    this.nlatencyStore = [];
     this.fpsStore = [];
     this.readings = 0;
   },
 
   getSElatency : function(){
     return this.elatencyStore;
-  },
-
-  getSNlatency : function(){
-    return this.nlatencyStore;
   },
 
   getSFps : function(){
@@ -72,4 +65,3 @@ dataPoints.prototype = {
     return this.counter;
   }
 }
-

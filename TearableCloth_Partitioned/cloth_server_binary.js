@@ -1,5 +1,8 @@
  /* This file uses BinaryJS library to transmit data.
-
+ It was written in the initial stages to comparet socket.io and binary js
+ Corresponding client js : js/cloth_client_binary.js
+ Corresponding html : index_binary.html
+ -Obsolete as of now- 
  */
 
  var http = require('http');
@@ -132,9 +135,9 @@ bs.on('connection', function(client){
                 encoded = msgpack.encode(toSend);
                 if(!displayed){
                     console.log('Size of cloth: ' + encoded.byteLength);
-                    displayed = true;    
+                    displayed = true;
                 }
-                
+
 
                 var buffer = new Buffer( new Uint8Array(encoded));
 

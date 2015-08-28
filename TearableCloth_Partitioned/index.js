@@ -1,4 +1,6 @@
-
+/*
+ This is a simple webserver to serve the files to the client.
+*/
  	var http = require('http');
  	var fs = require('fs');
  	var path = require('path');

@@ -20,7 +20,7 @@ import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
  */
 public class ReadingReader {
 	
-	static String header = "Id, Socket Latency, Mobile Latency, Socket FPS, Mobile FPS\n";
+	static String header = "Id, Cloudlet Latency, Mobile Latency, AWS Latency, Cloudlet FPS, Mobile FPS, AWS FPS\n";
 	
 	/**
 	 * @param args
@@ -52,7 +52,7 @@ public class ReadingReader {
 	
 	
 	public static void computeDir(File dir) throws IOException{
-		String[] reading = new String[5]; //id, Socket latency, Mobile latency, Socket FPS, Mobile FPS
+		String[] reading = new String[7]; //id, Cloudlet latency, Mobile latency, AWS Latency, Cloudlet FPS, Mobile FPS, AWS FPS
 		String dirName =  dir.getName();
 		FileWriter out = new FileWriter(dirName);
 		out.write(header);
@@ -65,11 +65,15 @@ public class ReadingReader {
 				if(contents.length > 0){
 					if(contents[0].equals("Socket")){
 						reading[1] = computeReading(scan.nextLine());
-						reading[3] = computeReading(scan.nextLine());
+						reading[4] = computeReading(scan.nextLine());
 					}
 					if(contents[0].equals("Mobile")){
 						reading[2] = computeReading(scan.nextLine());
-						reading[4] = computeReading(scan.nextLine());
+						reading[5] = computeReading(scan.nextLine());
+					}
+					if(contents[0].equals("Socket (AWS)")){
+						reading[3] = computeReading(scan.nextLine());
+						reading[6] = computeReading(scan.nextLine());
 					}
 				}
 			}

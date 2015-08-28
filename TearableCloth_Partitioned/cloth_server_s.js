@@ -1,9 +1,13 @@
- /* This file issues the update commands from the server at every 1000/60 ms. This is the timeout 
+ /* This file tries to issue the update commands from the server at every 1000/60 ms. This is the timeout
  interval set for the update function, it is not necessary that the update is happening at this
  rate only. The next update happens only when the current update has finished.
 
  The serialization mechanism uses typed array to represent the points and the constraint points.
  The performance is not good and the data being transmitted is also of the size of ~700KB.
+
+ Corresponding client js file: js/cloth_client_s.js
+ Corresponding html file: index.html
+ -Obsolete as of now-
  */
 
 
@@ -18,7 +22,7 @@
 
     if(req.url == '/')
         filePath = __dirname + '/index.html';
-    
+
     //console.log('Request URL :' + req.url);
     var extName = path.extname(req.url);
     var contentType = 'text/html';
@@ -78,7 +82,8 @@ var SerializedPoint = function (point){
     this.constraints = [];
     var i = point.constraints.length;
     while(i--){
-        this.constraints[i] = {x: point.constraints[i].p2.x, y: point.constraints[i].p2.y};
+        this.constraints[i] = {x: point.constraints[i].p2.x
+                            , y: point.constraints[i].p2.y};
     }
 };
 
@@ -112,7 +117,7 @@ server.listen(1234);
 var io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function(socket){
-    
+
     socket.on('load_parameters', function(data){
         parameters = data.parameters;
         //console.log("Parameters received. physics_accuracy = " + parameters.physics_accuracy);
@@ -191,15 +196,15 @@ Point.prototype.resolve_constraints = function () {
 
     // Get the number of constraints. Would be maximum 2
     var i = this.constraints.length;
-    while (i--) 
+    while (i--)
         this.constraints[i].resolve();
 
-    // if the point is going outside the boundary, 
+    // if the point is going outside the boundary,
     // give it a position within the boundary.
 
     if (this.x > boundsx) {
         this.x = 2 * boundsx - this.x;
-        
+
     } else if (this.x < 1) {
         this.x = 2 - this.x;
     }
@@ -207,7 +212,7 @@ Point.prototype.resolve_constraints = function () {
     if (this.y > boundsy) {
 
         this.y = 2 * boundsy - this.y;
-        
+
     } else if (this.y < 1) {
 
         this.y = 2 - this.y;
@@ -264,8 +269,8 @@ Constraint.prototype.resolve = function () {
         diff = (this.length - dist) / dist;
 
     // if distance between points is > tear distance, remove the constraint,
-    // i.e detach the points     
-    if (dist > parameters.tear_distance) 
+    // i.e detach the points
+    if (dist > parameters.tear_distance)
         this.p1.remove_constraint(this);
 
     // calculate the amount by which positions are to be changed.
@@ -298,11 +303,11 @@ var Cloth = function () {
 
             // if it is not the first point in the row, attach it with the point just before it
             x != 0 && p.attach(this.points[this.points.length - 1]);
-            
+
             // if it is the first row, pin the point at the coordinate. This is to keep the cloth
             // attached from the top.
             y == 0 && p.pin(p.x, p.y);
-            
+
             // if it is not the first row, attach the point to the point just above it in the matrix
             // |.|.|.|.|.|
             // |.|.|i|.|.|
@@ -324,14 +329,14 @@ Cloth.prototype.update = function () {
     // Resolve the constraints for all the points physics_accuracy number of times
     while (i--) {
         var p = this.points.length;
-        while (p--) 
+        while (p--)
             this.points[p].resolve_constraints();
     }
 
 
     i = this.points.length;
     // update all the points by delta amount. Brings swaying motion to the cloth
-    while (i--) 
+    while (i--)
         this.points[i].update(.016);
     var p = this.points.length;
     // while(p--)
@@ -360,5 +365,5 @@ function update(socket) {
     console.log('Id: ' + id + ', Event emitted at: ' + d.getHours() +':'+
     d.getMinutes() + ':' + d.getSeconds() + ':' + d.getMilliseconds());
     socket.emit('updatedCloth', {param : data});
-    setTimeout(update, 1000/60, socket);    
+    setTimeout(update, 1000/60, socket);
 }

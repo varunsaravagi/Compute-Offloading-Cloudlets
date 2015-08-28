@@ -1,5 +1,7 @@
 /* This is the client side javascript file of cloth_server_binary. It gets the points from
 the server and draws them.
+It uses BinaryJS library to communicate between the client and server.
+The file was written as a prototype to compare socket.io and binary.js
 */
 
 

@@ -1,5 +1,15 @@
 /* This file uses socket.io to store the points and transmit them over the server in a binary format.
 Only an array of points is being sent over the network. The neighbours would be re-discovered at the client.
+
+Serialization format:
+A point contains three numbers:
+  (x,y) coordinates of the point, can be integer or float,
+  integer (0-3) representing the neighboring constraint points.
+
+Corresponding client js file: js/cloth_client_diffser.js
+Corresponding html file: index_diffser.html
+
+-Obsolete as of now-
 */
 
 var http = require('http');
@@ -135,7 +145,7 @@ io.sockets.on('connection', function(socket){
        // encode the simpler version of cloth
        encoded = msgpack.encode(sCloth.points);
        //encoded = msgpack.encode(p);
-       //console.log('Time Taken: '+(new Date().getTime() - start));
+       console.log('Time Taken: '+(new Date().getTime() - start));
        // display the size of cloth. (display only once)
        if(!displayed){
            console.log('Size of Data: ' + encoded.byteLength);

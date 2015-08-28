@@ -1,5 +1,11 @@
-/* This file uses socket.io to store the points and transmit them over the server in a binary format.
-Only an array of points is being sent over the network. The neighbours would be re-discovered at the client.
+/*
+ This is the to-be-offloaded file if the cloudlet is discovered.
+ The corresponding client file is a unified version which contains the logic
+ to run the application purely on client side as well as offload on the Cloudlet.
+
+ Corresponding client js file: js/cloth_client_unified.js
+ Corresponding html file: index_unified.html
+ -Obsolete as of now-
 */
 
 var http = require('http');

@@ -1,10 +1,10 @@
-/* This is the client side of cloth_server_c. 
+/* This is the client side of cloth_server_c.
 */
 var socket = io.connect();
 
 // global parameters
 var parameters = {
-	physics_accuracy : 3, 
+	physics_accuracy : 3,
     mouse_influence : 20,
     mouse_cut : 5,
     gravity : 1200,
@@ -75,14 +75,13 @@ function emit_update(){
         socket.emit('updateCloth', {});
         doEmit = false;
     }
-    //requestAnimFrame(emit_update);
 }
 
 function update(){
     console.log('-----------------------');
-    
+
     socket.emit('updateCloth', {});
-    
+
 };
 
 socket.on('updatedCloth', function(data){
@@ -95,7 +94,7 @@ socket.on('updatedCloth', function(data){
     cloth = data.param.cloth;
     startDraw = new Date().getTime();
     draw();
-    console.log('Time taken to draw ' + (new Date().getTime() - startDraw));    
+    console.log('Time taken to draw ' + (new Date().getTime() - startDraw));
     doEmit = true;
     socket.emit('updateCloth', {t : new Date().getTime()});
 });
@@ -107,7 +106,7 @@ function draw() {
 
     var i = cloth.points.length;
     // Loop over all the points and draw each point
-    while (i--) 
+    while (i--)
         draw_points(cloth.points[i]);
 
     ctx.stroke();
@@ -119,9 +118,9 @@ function draw_points(point){
     var i = point.constraints.length;
     while(i--){
         ctx.moveTo(point.x, point.y);
-        ctx.lineTo(point.constraints[i].x, point.constraints[i].y);    
+        ctx.lineTo(point.constraints[i].x, point.constraints[i].y);
     }
-    
+
 }
 // start the simulation
 function start() {
@@ -160,8 +159,8 @@ function start() {
     boundsy = canvas.height - 1;
 
     ctx.strokeStyle = '#888';
-    
-    load_variables();    
+
+    load_variables();
     // Define the points and constraints in the cloth
     cloth = new Cloth();
     startTime = new Date().getTime();
@@ -187,7 +186,7 @@ window.onload = function () {
         var rect = canvas.getBoundingClientRect();
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
-        mouse.down = true;  
+        mouse.down = true;
     }, false);
 
     // detect touch movement
@@ -200,16 +199,16 @@ window.onload = function () {
         mouse.x = touch.clientX - rect.left,
         mouse.y = touch.clientY - rect.top,
         event.preventDefault();
-        console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");  
+        console.log("Touch move: Bounding rectangle: (" + rect.left + "," + rect.top + ")\n");
     }, false);
 
     // detect end of touch
     canvas.addEventListener("touchend", function(event){
-        event.preventDefault();        
+        event.preventDefault();
         mouse.down = false;
         event.preventDefault();
     }, false);
 
-    load_variables();  
+    load_variables();
     //start();
 };
