@@ -1,8 +1,8 @@
 /*
  This file would run the cloudlet server and save the files received from client.
+ This spawns the number of workers equal to the number of CPUs in the machine.
+ Each worker is responsible for handling request originating from same ip address.
 
- -- Do multi-client approach
- -- Do offloading
 */
 
 var http = require('http');

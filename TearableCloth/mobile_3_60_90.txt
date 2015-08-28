@@ -1,2 +1,0 @@
-End-to-end Latency: 9,6,7
-FPS: ,55,60
